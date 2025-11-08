@@ -3,75 +3,54 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hover Greens Studio — Online Swing Analysis</title>
+<title>Hover Greens Studio — Dual-Cam Swing Analysis</title>
 <style>
   :root{
-    --bg:#0b0f14; --fg:#eaf0f6; --muted:#a6b0bd; --brand:#19d47a; --brand-2:#4aa8ff; --panel:#131a22; --border:rgba(255,255,255,.08);
+    --bg:#0b0f14; --fg:#eaf0f6; --muted:#a6b0bd; --brand:#19d47a; --panel:#131a22; --border:rgba(255,255,255,.08);
+    --stroke:#ff4b4b;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:
-    radial-gradient(1200px 600px at 70% -10%,rgba(25,212,122,.08),transparent),
-    radial-gradient(900px 500px at 0% 100%,rgba(74,168,255,.10),transparent), var(--bg);
-    color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;}
-  a{color:var(--brand-2)}
+  html,body{margin:0;background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;}
+  a{color:var(--brand)}
   .wrap{max-width:1200px;margin:0 auto;padding:24px}
-  header.hero{
-    display:grid; gap:18px; padding:40px 0 20px; align-items:center;
-    grid-template-columns: 1.2fr .8fr;
-  }
-  @media (max-width: 960px){ header.hero{grid-template-columns:1fr; padding-top:24px} }
+  header.hero{padding:28px 0 10px}
   .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;
        background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); color:var(--muted); font-weight:700; font-size:12px; letter-spacing:.3px; text-transform:uppercase}
-  h1{font-size: clamp(28px, 4.5vw, 46px); line-height:1.1; margin:8px 0}
+  h1{font-size: clamp(28px, 4.5vw, 44px); line-height:1.1; margin:10px 0}
   .sub{color:var(--muted); font-size:clamp(15px,1.5vw,18px)}
-  .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
   .btn{border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
        color:var(--fg); padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer}
-  .btn.primary{background:linear-gradient(90deg,var(--brand),var(--brand-2)); border:none}
+  .btn.primary{background:linear-gradient(90deg,var(--brand),#4aa8ff); border:none}
   .btn.danger{background:linear-gradient(90deg,#ff5964,#ff8c5a); border:none}
   .pill{padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,.02)}
-  .grid{display:grid; gap:16px}
   .panels{display:grid; grid-template-columns:1fr 1fr; gap:16px}
   @media (max-width: 960px){ .panels{grid-template-columns:1fr} }
   .panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative}
   .panel header{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02)}
   .panel header .ttl{font-weight:800}
-  .panel .slot{position:relative; aspect-ratio:16/9; background:#0b0e13}
+  .slot{position:relative; aspect-ratio:16/9; background:#0b0e13}
   video{width:100%; height:100%; object-fit:contain; background:#000}
-  canvas.overlay{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none}
+  /* FIX: allow drawing on top of video */
+  canvas.overlay{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:auto; z-index:2}
   .panel footer{padding:10px 12px; border-top:1px solid var(--border); background:rgba(255,255,255,.02)}
   .tools, .global{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
   .tiny{font-size:12px; color:var(--muted)}
   .divider{height:1px; background:var(--border); margin:18px 0}
-  input[type="range"]{accent-color:var(--brand-2)}
+  input[type="range"]{accent-color:#4aa8ff}
   select{background:rgba(255,255,255,.03); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:6px}
-  .pulse{position:absolute; right:12px; top:10px; width:10px; height:10px; border-radius:50%; background:var(--brand);
-         box-shadow:0 0 0 8px rgba(25,212,122,.12); animation:pulse 2s infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 8px rgba(25,212,122,.12)} 60%{box-shadow:0 0 0 16px rgba(25,212,122,.01)} 100%{box-shadow:0 0 0 8px rgba(25,212,122,.12)}}
   .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0f1420; border:1px solid var(--border); padding:2px 6px; border-radius:6px}
-  .note{color:var(--muted); font-size:13px}
-  .floating-help{position:fixed; right:16px; bottom:16px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:10px 12px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header class="hero">
-      <div>
-        <span class="tag">Hover Greens Studio</span>
-        <h1>Touchless, multi-angle golf swing analysis — right in your browser.</h1>
-        <p class="sub">Upload or record swings, sync with pro examples, draw and measure, slow it down, and step frame-by-frame. No downloads. No logins.</p>
-        <div class="cta-row">
-          <button class="btn primary" id="ctaStart">Start Now</button>
-          <span class="tiny">Shortcuts: <span class="kbd">Space</span> Play/Pause • <span class="kbd">,</span>/<span class="kbd">.</span> frame step</span>
-        </div>
-      </div>
-      <div class="panel" aria-label="Live preview">
-        <header><span class="ttl">Hover Greens Studio</span><span class="tiny">Draw lines • Angle tool • Multi-angle</span></header>
-        <div class="slot">
-          <video id="previewVideo" muted loop playsinline></video>
-          <canvas class="overlay" id="previewOverlay"></canvas>
-        </div>
-        <footer><div class="tools"><span class="note">Load or record your videos below to begin.</span></div></footer>
+      <span class="tag">Hover Greens Studio</span>
+      <h1>Dual-camera recording, synced playback, and on-video drawing.</h1>
+      <p class="sub">Record both angles at once and auto-play them together. Draw red <b>lines</b> and <b>circles</b> directly on video — drawings persist during playback.</p>
+      <div class="cta-row">
+        <button class="btn primary" id="ctaStart">Start Now</button>
+        <span class="tiny">Shortcuts: <span class="kbd">Space</span> Play/Pause • <span class="kbd">,</span>/<span class="kbd">.</span> frame step • Hold <span class="kbd">C</span> to draw circle</span>
       </div>
     </header>
 
@@ -83,24 +62,17 @@
           <button class="btn" id="btnSync">Play/Pause Both</button>
           <button class="btn" id="btnBack">◀︎ Frame</button>
           <button class="btn" id="btnFwd">Frame ▶︎</button>
-          <label class="pill">Draw
-            <select id="drawMode">
-              <option value="off">Off</option>
-              <option value="line">Line</option>
-              <option value="angle">Angle (2 lines)</option>
-            </select>
-          </label>
-          <button class="btn" id="btnClear">Clear Drawings</button>
+          <button class="btn" id="btnClearAll">Clear All Drawings</button>
         </div>
       </header>
-      <footer><span class="tiny">Playback rate and frame stepping affect all players.</span></footer>
+      <footer><span class="tiny">Drag to draw a <b>line</b>. Hold <span class="kbd">C</span> while dragging to draw a <b>circle</b>. Hold <span class="kbd">Shift</span> to lock line H/V.</span></footer>
     </section>
 
-    <section class="grid panels" id="panelGrid">
-      <!-- Left: Angle A -->
+    <section class="panels" id="panelGrid">
+      <!-- Left -->
       <div class="panel" data-role="player" id="panelA">
         <header>
-          <span class="ttl">Angle A (Your Swing)</span>
+          <span class="ttl">Angle A</span>
           <div class="tools">
             <label class="btn">Upload<input type="file" accept="video/*" hidden class="file"></label>
             <select class="cameraSel" title="Select Camera A"></select>
@@ -128,10 +100,10 @@
         </footer>
       </div>
 
-      <!-- Right: Angle B -->
+      <!-- Right -->
       <div class="panel" data-role="player" id="panelB">
         <header>
-          <span class="ttl">Angle B (Pro/2nd View)</span>
+          <span class="ttl">Angle B</span>
           <div class="tools">
             <label class="btn">Upload<input type="file" accept="video/*" hidden class="file"></label>
             <select class="cameraSel" title="Select Camera B"></select>
@@ -176,12 +148,7 @@
           <span class="tiny" id="recStatus">Not recording</span>
         </div>
       </header>
-      <footer class="note">
-        Select different cameras in each panel (USB cams show by name). Click <b>● Record Both</b> to capture simultaneously. When it stops, both clips auto-sync and (optionally) auto-play.
-      </footer>
     </section>
-
-    <div class="floating-help tiny">Hover Greens Studio — made for fast, visual improvement.</div>
   </div>
 
 <script>
@@ -190,34 +157,12 @@
   const $$ = (sel, el=document)=>[...el.querySelectorAll(sel)];
   const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
 
-  // --- Decorative overlay in hero
-  const previewOverlay = $('#previewOverlay');
-  const pctx = previewOverlay.getContext('2d');
-  function resizeCanvas(canvas){
-    const r = canvas.getBoundingClientRect();
-    canvas.width = Math.max(2, Math.floor(r.width));
-    canvas.height = Math.max(2, Math.floor(r.height));
-  }
-  resizeCanvas(previewOverlay);
-  let t=0; (function drawPreview(){
-    resizeCanvas(previewOverlay);
-    pctx.clearRect(0,0,previewOverlay.width, previewOverlay.height);
-    pctx.strokeStyle = '#4aa8ff'; pctx.lineWidth = 3;
-    const w = previewOverlay.width, h = previewOverlay.height;
-    const x = (Math.sin(t/40)*.4+.5)*w*0.9;
-    pctx.beginPath(); pctx.moveTo(x, h*.2); pctx.lineTo(x, h*.8); pctx.stroke();
-    pctx.fillStyle = 'rgba(25,212,122,.25)';
-    pctx.beginPath(); pctx.arc(w*.6, h*.55, 36+6*Math.sin(t/12), 0, Math.PI*2); pctx.fill();
-    t++; requestAnimationFrame(drawPreview);
-  })();
-
-  // --- Globals
+  // Globals
   const globalRate = $('#rate');
   const btnSync = $('#btnSync'), btnBack=$('#btnBack'), btnFwd=$('#btnFwd');
-  const drawModeSel = $('#drawMode'), btnClearAll = $('#btnClear');
+  const btnClearAll = $('#btnClearAll');
   const recordBtn = $('#recordBoth'), stopBtn = $('#stopBoth'), recStatus = $('#recStatus');
   const autoPlayAfter = $('#autoPlayAfter'), autoLoop = $('#autoLoop'), maxDur = $('#maxDur');
-
   const panelGrid = $('#panelGrid');
 
   function timeStep(video, dir=+1){
@@ -228,13 +173,12 @@
 
   async function listCameras(){
     try{
-      // Trigger permission prompt if not yet granted, so labels are readable
+      // Pre-prompt permission so labels are visible
       await navigator.mediaDevices.getUserMedia({video:true, audio:false}).then(s=>s.getTracks().forEach(tr=>tr.stop())).catch(()=>{});
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.filter(d=>d.kind==='videoinput');
     }catch(e){ console.warn(e); return []; }
   }
-
   function populateCameraDropdowns(){
     listCameras().then(cams=>{
       $$('.cameraSel').forEach((sel,i)=>{
@@ -250,11 +194,125 @@
     });
   }
 
-  // --- Panel init (upload, camera preview, drawing, per-rate, etc.)
+  // ---- Drawing helpers (LINES + CIRCLES, red, no fill)
+  function drawingLayer(overlay){
+    const ctx = overlay.getContext('2d');
+    const state = {
+      shapes: [], // {type:'line', a:{x,y}, b:{x,y}} | {type:'circle', c:{x,y}, r}
+      active: null, // temp drawing
+      keys: {c:false, shift:false}
+    };
+    const stroke = getComputedStyle(document.documentElement).getPropertyValue('--stroke') || '#ff4b4b';
+
+    function resize(){
+      const r = overlay.getBoundingClientRect();
+      overlay.width = Math.max(2, Math.floor(r.width));
+      overlay.height = Math.max(2, Math.floor(r.height));
+      redraw();
+    }
+    const ro = new ResizeObserver(resize); ro.observe(overlay);
+
+    function redraw(){
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+      ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle = stroke;
+
+      // Draw saved shapes
+      for(const s of state.shapes){
+        if(s.type==='line'){
+          ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke();
+        }else if(s.type==='circle'){
+          ctx.beginPath(); ctx.arc(s.c.x, s.c.y, s.r, 0, Math.PI*2); ctx.stroke();
+        }
+      }
+      // Active preview
+      const s = state.active;
+      if(s){
+        ctx.setLineDash([8,6]);
+        if(s.type==='line'){
+          ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke();
+        }else if(s.type==='circle'){
+          ctx.beginPath(); ctx.arc(s.c.x, s.c.y, s.r, 0, Math.PI*2); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+    }
+
+    function px(ev){
+      const r = overlay.getBoundingClientRect();
+      const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      return {
+        x: (clientX - r.left) / r.width * overlay.width,
+        y: (clientY - r.top) / r.height * overlay.height
+      };
+    }
+    function onDown(ev){
+      ev.preventDefault();
+      const p = px(ev);
+      if(state.keys.c){
+        // start circle
+        state.active = {type:'circle', c:p, r:0};
+      }else{
+        // start line
+        state.active = {type:'line', a:p, b:p};
+      }
+      redraw();
+    }
+    function onMove(ev){
+      if(!state.active) return;
+      const p = px(ev);
+      if(state.active.type==='line'){
+        let a = state.active.a;
+        let b = p;
+        if(state.keys.shift){
+          // lock to H/V depending on stronger axis
+          const dx = Math.abs(p.x - a.x), dy = Math.abs(p.y - a.y);
+          if(dx > dy){ b = {x:p.x, y:a.y}; } else { b = {x:a.x, y:p.y}; }
+        }
+        state.active.b = b;
+      }else if(state.active.type==='circle'){
+        const dx = p.x - state.active.c.x, dy = p.y - state.active.c.y;
+        state.active.r = Math.hypot(dx, dy);
+      }
+      redraw();
+    }
+    function onUp(ev){
+      if(!state.active) return;
+      if(state.active.type==='line'){
+        // ignore tiny clicks
+        const {a,b} = state.active;
+        if(Math.hypot(a.x-b.x, a.y-b.y) > 2) state.shapes.push({type:'line', a, b});
+      }else if(state.active.type==='circle'){
+        if(state.active.r > 1) state.shapes.push({type:'circle', c:state.active.c, r:state.active.r});
+      }
+      state.active = null;
+      redraw();
+    }
+    function clear(){ state.shapes.length = 0; state.active=null; redraw(); }
+
+    function onKey(e, down){
+      if(e.key==='c' || e.key==='C'){ state.keys.c = down; }
+      if(e.key==='Shift'){ state.keys.shift = down; }
+    }
+    window.addEventListener('keydown', e=>onKey(e,true));
+    window.addEventListener('keyup', e=>onKey(e,false));
+
+    overlay.addEventListener('pointerdown', onDown);
+    overlay.addEventListener('pointermove', onMove);
+    overlay.addEventListener('pointerup', onUp);
+    overlay.addEventListener('pointerleave', onUp);
+    overlay.addEventListener('touchstart', onDown, {passive:false});
+    overlay.addEventListener('touchmove', onMove, {passive:false});
+    overlay.addEventListener('touchend', onUp);
+
+    resize();
+    return {clear, redraw, state};
+  }
+
+  // ---- Panel init
   function initPanel(panel){
     const video = $('.vid', panel);
     const overlay = $('.overlay', panel);
-    const ctx = overlay.getContext('2d');
     const rateLabel = $('.rate', panel);
     const rateSlider = $('[data-rate]', panel);
     const file = $('.file', panel);
@@ -265,15 +323,14 @@
     const btnCam = $('[data-cam]', panel);
     const camSel = $('.cameraSel', panel);
 
-    // Resize overlay
-    const ro = new ResizeObserver(()=>resizeCanvas(overlay)); ro.observe(overlay);
+    const drawAPI = drawingLayer(overlay);
 
-    // Upload video
+    // Upload
     file?.addEventListener('change', e=>{
       const f = e.target.files[0]; if(!f) return;
       const url = URL.createObjectURL(f);
       video.srcObject = null; video.src = url; video.load();
-      if(autoLoop.checked) video.loop = true;
+      video.loop = autoLoop.checked;
     });
 
     // Camera preview
@@ -286,7 +343,6 @@
         if(currentStream) currentStream.getTracks().forEach(t=>t.stop());
         currentStream = stream;
         video.srcObject = stream; video.muted = true; await video.play();
-        if(!panel.querySelector('.pulse')) panel.insertAdjacentHTML('beforeend','<span class="pulse" title="Camera live"></span>');
         panel.__player.stream = stream;
       }catch(err){ console.error(err); alert('Camera not available or permission denied.'); }
     }
@@ -298,7 +354,7 @@
     btnBack.addEventListener('click', ()=>timeStep(video, -1));
     btnFwd.addEventListener('click', ()=>timeStep(video, +1));
 
-    // Per-panel rate
+    // Rates
     rateSlider.addEventListener('input', ()=>{
       video.playbackRate = parseFloat(rateSlider.value);
       rateLabel.textContent = video.playbackRate.toFixed(2)+'x';
@@ -306,68 +362,18 @@
     const applyGlobalRate = ()=>{ const r = parseFloat(globalRate.value); video.playbackRate = r; rateSlider.value = r; rateLabel.textContent = r.toFixed(2)+'x'; };
     applyGlobalRate();
 
-    // Drawing
-    let drawState = { mode:'off', points:[], shapes:[] };
-    function px(ev){
-      const r = overlay.getBoundingClientRect();
-      const x = ( (ev.clientX ?? ev.touches?.[0]?.clientX) - r.left ) / r.width * overlay.width;
-      const y = ( (ev.clientY ?? ev.touches?.[0]?.clientY) - r.top ) / r.height * overlay.height;
-      return {x,y};
-    }
-    function redraw(){
-      resizeCanvas(overlay);
-      ctx.clearRect(0,0,overlay.width,overlay.height);
-      ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
-      for(const s of drawState.shapes){
-        if(s.type==='line'){ ctx.strokeStyle = '#4aa8ff'; ctx.beginPath(); ctx.moveTo(s.a.x,s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke(); }
-        if(s.type==='angle'){
-          ctx.strokeStyle = '#19d47a';
-          ctx.beginPath(); ctx.moveTo(s.b.x,s.b.y); ctx.lineTo(s.a.x,s.a.y); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(s.b.x,s.b.y); ctx.lineTo(s.c.x,s.c.y); ctx.stroke();
-          const ang = angleBetween(s.b,s.a,s.c);
-          ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.strokeStyle='rgba(255,255,255,.35)';
-          ctx.beginPath(); ctx.arc(s.b.x, s.b.y, 22, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-          ctx.fillStyle='#fff'; ctx.font='bold 12px system-ui, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText(`${ang.toFixed(1)}°`, s.b.x, s.b.y);
-        }
-      }
-      if(drawState.points.length){
-        ctx.fillStyle='#19d47a';
-        for(const p of drawState.points){ ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); }
-      }
-    }
-    function angleBetween(B,A,C){
-      const v1={x:A.x-B.x, y:A.y-B.y}, v2={x:C.x-B.x, y:C.y-B.y};
-      const dot=v1.x*v2.x+v1.y*v2.y, m1=Math.hypot(v1.x,v1.y), m2=Math.hypot(v2.x,v2.y);
-      const cos = clamp(dot/(m1*m2+1e-9), -1, 1); return (Math.acos(cos)*180/Math.PI);
-    }
-    function onDown(ev){ if(drawState.mode==='off') return; ev.preventDefault();
-      const pt=px(ev); drawState.points.push(pt);
-      if(drawState.mode==='line' && drawState.points.length===2){ drawState.shapes.push({type:'line', a:drawState.points[0], b:drawState.points[1]}); drawState.points=[]; }
-      if(drawState.mode==='angle' && drawState.points.length===3){ const [a,b,c]=drawState.points; drawState.shapes.push({type:'angle', a,b,c}); drawState.points=[]; }
-      redraw();
-    }
-    function onMove(ev){ if(!drawState.points.length) return; const pt=px(ev); drawState.points[drawState.points.length-1]=pt; redraw(); }
-
-    overlay.addEventListener('pointerdown', onDown);
-    overlay.addEventListener('pointermove', onMove);
-    overlay.addEventListener('touchstart', onDown, {passive:false});
-    overlay.addEventListener('touchmove', onMove, {passive:false});
-
-    function clearDraw(){ drawState.points=[]; drawState.shapes=[]; redraw(); }
-
-    // Expose player API
+    // Expose
     panel.__player = {
-      video, overlay, redraw, clearDraw, stream:null,
+      video, overlay, drawAPI, stream:null,
       setRate:(r)=>{ video.playbackRate=r; rateSlider.value=r; rateLabel.textContent=r.toFixed(2)+'x'; },
       step:(d)=>timeStep(video,d),
       startCam, camSel
     };
 
-    $('[data-clear]', panel).addEventListener('click', clearDraw);
+    $('[data-clear]', panel).addEventListener('click', ()=>drawAPI.clear());
   }
 
-  // Init both primary panels
+  // Init panels
   $$('.panel[data-role="player"]').forEach(initPanel);
   populateCameraDropdowns();
 
@@ -376,11 +382,6 @@
     const r = parseFloat(globalRate.value);
     $$('.panel[data-role="player"]').forEach(p=>p.__player?.setRate(r));
   });
-  drawModeSel.addEventListener('change', ()=>{
-    window.__drawMode = drawModeSel.value;
-    window.dispatchEvent(new Event('dm_drawmode'));
-  });
-  window.__drawMode = drawModeSel.value;
   btnSync.addEventListener('click', ()=>{
     const vids = $$('.panel[data-role="player"] .vid');
     const playAll = vids.some(v=>v.paused);
@@ -388,10 +389,10 @@
   });
   btnBack.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
   btnFwd.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
-  btnClearAll.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.clearDraw());});
+  btnClearAll.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.drawAPI.clear());});
   $('#ctaStart').addEventListener('click', ()=>panelGrid.scrollIntoView({behavior:'smooth'}));
 
-  // --- Simultaneous recording (Option A)
+  // ---- Simultaneous recording
   let recA=null, recB=null, chunksA=[], chunksB=[], recTimer=null;
   async function ensurePreviewStreams(){
     const panels = [$('#panelA'), $('#panelB')];
@@ -399,7 +400,7 @@
       if(!p.__player.stream){ await p.__player.startCam(); }
     }
   }
-  function makeRecorder(stream, ondata){ 
+  function makeRecorder(stream, ondata){
     const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' :
                  MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
     const rec = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond: 6_000_000});
@@ -420,7 +421,6 @@
     recB = makeRecorder(pB.stream, d=>chunksB.push(d));
     recA.start(); recB.start();
     setRecUI(true);
-    // Auto stop after maxDur seconds (safety)
     const dur = clamp(parseFloat(maxDur.value)||8, 1, 120);
     recTimer = setTimeout(stopBoth, dur*1000);
   }
@@ -455,11 +455,9 @@
     clearTimeout(recTimer); recTimer=null;
     setRecUI(false);
 
-    // Once both stop, build blobs and assign
     const done = {};
     const tryFinish = ()=>{
       if(done.a && done.b){
-        // assign to videos and sync play
         const vA = $('#panelA').__player.video;
         const vB = $('#panelB').__player.video;
         const blobA = new Blob(chunksA, {type: chunksA[0]?.type || 'video/webm'});
@@ -469,8 +467,8 @@
         syncAndPlay();
       }
     };
-    recA && (recA.onstop = ()=>{ done.a=true; tryFinish(); });
-    recB && (recB.onstop = ()=>{ done.b=true; tryFinish(); });
+    if(recA) recA.onstop = ()=>{ done.a=true; tryFinish(); };
+    if(recB) recB.onstop = ()=>{ done.b=true; tryFinish(); };
   }
 
   recordBtn.addEventListener('click', startBoth);
