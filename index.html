@@ -6,13 +6,8 @@
 <title>Hover Greens Studio</title>
 <style>
   :root{
-    --bg:#000000;       /* matte black */
-    --panel:#0A0A0A;    /* panel matte */
-    --fg:#FFFFFF;       /* primary text */
-    --muted:#CCCCCC;    /* secondary text */
-    --border:#1a1a1a;   /* low-contrast border */
-    --accent:#1E7030;   /* luxurious forest green */
-    --stroke:#ff4b4b;   /* drawing color (red) */
+    --bg:#000000; --panel:#0A0A0A; --fg:#FFFFFF; --muted:#CCCCCC;
+    --border:#1a1a1a; --accent:#1E7030; --stroke:#ff4b4b;
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
@@ -23,23 +18,28 @@
   header.hero{display:flex;align-items:center;justify-content:space-between;padding:6px 0 16px}
   .brand{font-weight:900;font-size:20px;display:flex;align-items:center;gap:10px}
   .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
-  .tag{color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px}
 
-  /* Buttons & UI */
-  .btn{border:1px solid var(--border);background:#000;color:var(--fg);padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;transition:.15s}
+  /* Buttons & Controls */
+  .btn{border:1px solid var(--border);background:#000;color:var(--fg);
+       padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;transition:.15s}
   .btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
   .btn.flat-green{background:var(--accent);border-color:var(--accent)}
   .btn.flat-green:hover{background:#155324;border-color:#155324}
   .btn.danger{background:#ff4b4b;border-color:#ff4b4b;color:#000}
   .btn.danger:hover{background:#c83c3c;border-color:#c83c3c;color:#fff}
+  .btn.txt{background:transparent;border:1px solid var(--border)} /* minimalist text-like */
   .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#000;color:var(--muted)}
   .pill.green{color:var(--accent)}
-  select,input[type="number"]{background:#000;color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px}
+  .tiny{font-size:12px;color:var(--muted)}
+  .divider{height:1px;background:var(--border);margin:18px 0}
+
+  /* Inputs */
+  select,input[type="number"]{background:#000;color:#fff;border:1px solid var(--border);border-radius:8px;padding:6px}
   select.green{color:var(--accent)}
   input[type="range"]{appearance:none;height:4px;background:#1a1a1a;border-radius:999px;outline:none;width:160px}
   input[type="range"]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:none;cursor:pointer}
-  .tiny{font-size:12px;color:var(--muted)}
-  .divider{height:1px;background:var(--border);margin:18px 0}
+  .camSel{width:240px}      /* fixed width for alignment */
+  .camRefresh{width:56px}   /* fixed width for ↻ button */
 
   /* Panels */
   .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;transition:grid-template-columns .35s ease}
@@ -52,7 +52,7 @@
   video{width:100%;height:100%;object-fit:contain;background:#000}
   canvas.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:auto;z-index:2}
 
-  /* Single mode behavior */
+  /* Single mode */
   body.single .panels{grid-template-columns:1fr}
   body.single #panelB{opacity:0;transform:scale(.98);pointer-events:none;position:absolute;left:-9999px}
   body.single #recordBothSection{display:none}
@@ -62,7 +62,7 @@
   <div class="wrap">
     <header class="hero">
       <div class="brand"><span class="dot"></span>Hover Greens Studio</div>
-      <span class="tag">Matte • Minimal • Pro</span>
+      <!-- tagline removed -->
     </header>
 
     <!-- Global Controls -->
@@ -92,6 +92,9 @@
         <header>
           <span class="ttl">Angle A</span>
           <div class="tools">
+            <span class="tiny">Camera:</span>
+            <select class="camSel"></select>
+            <button class="btn txt camRefresh">↻</button>
             <button class="btn" data-cam>Use Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
           </div>
@@ -131,6 +134,9 @@
         <header>
           <span class="ttl">Angle B</span>
           <div class="tools">
+            <span class="tiny">Camera:</span>
+            <select class="camSel"></select>
+            <button class="btn txt camRefresh">↻</button>
             <button class="btn" data-cam>Use Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
           </div>
@@ -201,7 +207,39 @@
   applyMode(modeSelect.value);
 
   // Frame step helper
-  function step(video, dir=+1){ const dt = 1/60; video.pause(); video.currentTime = clamp(video.currentTime + dir*dt, 0, video.duration||1e9); }
+  function step(video, dir=+1){ const dt=1/60; video.pause(); video.currentTime= Math.min((video.duration||1e9), Math.max(0, video.currentTime + dir*dt)); }
+
+  // Camera device management
+  let cachedCameras = [];
+  async function enumerateCameras(){
+    try{
+      // Ensure permission so labels appear
+      await navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      cachedCameras = devs.filter(d=>d.kind==='videoinput');
+    }catch(e){ console.warn(e); cachedCameras=[]; }
+    return cachedCameras;
+  }
+  async function populateCameraDropdowns(){
+    const cams = await enumerateCameras();
+    $$('.panel[data-role="player"]').forEach((panel,i)=>{
+      const sel = panel.querySelector('.camSel');
+      if(!sel) return;
+      const prev = sel.value;
+      sel.innerHTML='';
+      cams.forEach((c,idx)=>{
+        const o=document.createElement('option');
+        o.value = c.deviceId || '';
+        o.textContent = c.label || `Camera ${idx+1}`;
+        sel.appendChild(o);
+      });
+      // default to i-th camera if exists, else first
+      if(cams.length){
+        const target = (i < cams.length) ? cams[i].deviceId : cams[0].deviceId;
+        sel.value = prev && [...sel.options].some(o=>o.value===prev) ? prev : target;
+      }
+    });
+  }
 
   // Drawing layer (red, no fill)
   function makeDrawing(overlay){
@@ -232,9 +270,9 @@
     }
     function pos(ev){
       const r = overlay.getBoundingClientRect();
-      const x = ( (ev.clientX ?? ev.touches?.[0]?.clientX) - r.left ) / r.width * overlay.width;
-      const y = ( (ev.clientY ?? ev.touches?.[0]?.clientY) - r.top ) / r.height * overlay.height;
-      return {x,y};
+      const cx = (ev.clientX ?? ev.touches?.[0]?.clientX);
+      const cy = (ev.clientY ?? ev.touches?.[0]?.clientY);
+      return { x:(cx - r.left)/r.width*overlay.width, y:(cy - r.top)/r.height*overlay.height };
     }
     function down(ev){
       if(state.mode==='off') return;
@@ -270,34 +308,44 @@
 
   // Panel init
   function initPanel(panel){
-    const video = $('.vid', panel);
-    const overlay = $('.overlay', panel);
-    const drawSel = $('.drawMode', panel);
-    const btnCam = $('[data-cam]', panel);
-    const btnPlay = $('[data-play]', panel);
-    const btnPause = $('[data-pause]', panel);
-    const btnBack = $('[data-back]', panel);
-    const btnFwd = $('[data-fwd]', panel);
-    const rateLbl = $('.rate', panel);
-    const rateSlider = $('[data-rate]', panel);
-    const btnClear = $('[data-clear]', panel);
-    const btnRec = $('[data-rec]', panel);
-    const btnStop = $('[data-stop]', panel);
-    const recStatus = $('.recStatus', panel);
+    const video = panel.querySelector('.vid');
+    const overlay = panel.querySelector('.overlay');
+    const drawSel = panel.querySelector('.drawMode');
+    const btnCam = panel.querySelector('[data-cam]');
+    const btnPlay = panel.querySelector('[data-play]');
+    const btnPause = panel.querySelector('[data-pause]');
+    const btnBack = panel.querySelector('[data-back]');
+    const btnFwd = panel.querySelector('[data-fwd]');
+    const rateLbl = panel.querySelector('.rate');
+    const rateSlider = panel.querySelector('[data-rate]');
+    const btnClear = panel.querySelector('[data-clear]');
+    const btnRec = panel.querySelector('[data-rec]');
+    const btnStop = panel.querySelector('[data-stop]');
+    const recStatus = panel.querySelector('.recStatus');
+    const camSel = panel.querySelector('.camSel');
+    const camRefresh = panel.querySelector('.camRefresh');
 
     // Drawing
     const drawAPI = makeDrawing(overlay);
     drawSel.addEventListener('change', ()=>drawAPI.setMode(drawSel.value));
 
-    // Camera
-    async function startCam(){
+    // Camera start/switch
+    let currentStream = null;
+    async function startCamWith(deviceId){
       try{
-        const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+        const constraints = { video: deviceId ? {deviceId:{exact:deviceId}, width:{ideal:1920}, height:{ideal:1080}} : {width:{ideal:1920}, height:{ideal:1080}}, audio:false };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        if(currentStream) currentStream.getTracks().forEach(t=>t.stop());
+        currentStream = stream;
         video.srcObject = stream; video.muted = true; await video.play();
         panel.__player.stream = stream;
-      }catch(e){ console.error(e); alert('Camera permission denied or unavailable.'); }
+      }catch(e){ console.error(e); alert('Camera permission denied or camera unavailable.'); }
     }
-    btnCam.addEventListener('click', startCam);
+    btnCam.addEventListener('click', ()=>startCamWith(camSel.value || undefined));
+    camSel.addEventListener('change', ()=>{
+      if(panel.__player?.stream) startCamWith(camSel.value || undefined);
+    });
+    camRefresh.addEventListener('click', populateCameraDropdowns);
 
     // Controls
     btnPlay.addEventListener('click', ()=>video.play());
@@ -321,14 +369,14 @@
     }
     btnRec.addEventListener('click', async ()=>{
       try{
-        if(!panel.__player.stream) await startCam();
+        if(!panel.__player.stream) await startCamWith(camSel.value || undefined);
         chunks=[]; rec = makeRecorder(panel.__player.stream, d=>chunks.push(d));
         rec.onstart=()=>{ btnRec.disabled=true; btnStop.disabled=false; recStatus.textContent='Recording…'; };
         rec.onstop=()=>{
           btnRec.disabled=false; btnStop.disabled=true; recStatus.textContent='Idle';
           const blob = new Blob(chunks, {type: chunks[0]?.type || 'video/webm'});
           const url = URL.createObjectURL(blob);
-          video.srcObject=null; video.src=url; video.loop = autoLoop.checked; video.load(); video.currentTime=0; video.play();
+          video.srcObject=null; video.src=url; video.loop=autoLoop.checked; video.load(); video.currentTime=0; video.play();
         };
         rec.start();
       }catch(e){ console.error(e); alert('Unable to start recording.'); }
@@ -339,7 +387,7 @@
     panel.__player = {
       video, overlay, drawAPI, stream:null,
       setRate:(r)=>{ video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; },
-      step:(d)=>step(video,d)
+      step:(d)=>{ const dt=1/60; video.pause(); video.currentTime=Math.min((video.duration||1e9), Math.max(0, video.currentTime + d*dt)); }
     };
 
     // Clear drawings
@@ -349,25 +397,28 @@
   // Init both panels
   $$('.panel[data-role="player"]').forEach(initPanel);
 
+  // Populate camera selects and allow refresh
+  populateCameraDropdowns();
+
   // Global controls
   rateGlobal.addEventListener('input', ()=>{
     const r=parseFloat(rateGlobal.value);
     $$('.panel[data-role="player"]').forEach(p=>p.__player?.setRate(r));
   });
-  btnSync.addEventListener('click', ()=>{
+  $('#btnSync').addEventListener('click', ()=>{
     const vids = $$('.panel[data-role="player"] .vid');
     const playAll = vids.some(v=>v.paused);
     vids.forEach(v=>{ v.loop = autoLoop.checked; playAll ? v.play() : v.pause(); });
   });
-  btnBack.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
-  btnFwd.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
+  $('#btnBack').addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
+  $('#btnFwd').addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e)=>{
     if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)) return;
-    if(e.code==='Space'){ e.preventDefault(); btnSync.click(); }
-    if(e.key===','){ e.preventDefault(); btnBack.click(); }
-    if(e.key==='.'){ e.preventDefault(); btnFwd.click(); }
+    if(e.code==='Space'){ e.preventDefault(); $('#btnSync').click(); }
+    if(e.key===','){ e.preventDefault(); $('#btnBack').click(); }
+    if(e.key==='.'){ e.preventDefault(); $('#btnFwd').click(); }
   });
 
   // Record Both (sync)
@@ -377,8 +428,8 @@
 
   async function ensureBothStreams(){
     const pA = $('#panelA'), pB = $('#panelB');
-    if(!pA.__player.stream){ await pA.querySelector('[data-cam]').click(); }
-    if(!pB.__player.stream){ await pB.querySelector('[data-cam]').click(); }
+    if(!pA.__player.stream){ pA.querySelector('[data-cam]').click(); }
+    if(!pB.__player.stream){ pB.querySelector('[data-cam]').click(); }
   }
   function makeRecorder(stream, ondata){
     const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
@@ -435,6 +486,7 @@
   }
   recordBothBtn?.addEventListener('click', startBoth);
   stopBothBtn?.addEventListener('click', stopBoth);
+
 })();
 </script>
 </body>
