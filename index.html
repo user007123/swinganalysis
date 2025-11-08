@@ -6,224 +6,435 @@
 <title>Hover Greens Studio</title>
 <style>
   :root{
-    --bg:#000;
-    --panel:#0A0A0A;
-    --fg:#FFFFFF;
-    --muted:#CCCCCC;
-    --border:#1a1a1a;
-    --accent:#1E7030;
-    --stroke:#ff4b4b;
+    --bg:#000000;       /* matte black */
+    --panel:#0A0A0A;    /* panel matte */
+    --fg:#FFFFFF;       /* primary text */
+    --muted:#CCCCCC;    /* secondary text */
+    --border:#1a1a1a;   /* low-contrast border */
+    --accent:#1E7030;   /* luxurious forest green */
+    --stroke:#ff4b4b;   /* drawing color (red) */
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--fg);font-family:system-ui,Arial,sans-serif;}
-  .wrap{max-width:1200px;margin:0 auto;padding:24px;}
-  header.hero{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-  .brand{font-weight:900;font-size:20px;display:flex;align-items:center;gap:8px;}
-  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
-  .tag{font-size:12px;color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:999px;}
-  .btn{background:#000;border:1px solid var(--border);color:var(--fg);padding:8px 12px;border-radius:8px;cursor:pointer;transition:.2s;}
-  .btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .btn.flat-green{background:var(--accent);border-color:var(--accent);}
-  .btn.flat-green:hover{background:#155324;}
-  .btn.danger{background:#ff4b4b;border-color:#ff4b4b;color:#000;}
-  .btn.danger:hover{background:#c83c3c;color:#fff;}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .4s ease;}
-  .panel header, .panel footer{padding:8px 10px;border-bottom:1px solid var(--border);}
-  .panel footer{border-top:1px solid var(--border);border-bottom:none;}
-  .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-  .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;transition:all .4s ease;}
-  .slot{position:relative;aspect-ratio:16/9;}
-  video{width:100%;height:100%;background:#000;object-fit:contain;}
-  canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:auto;}
-  select,input[type=number]{background:#000;border:1px solid var(--border);color:var(--fg);padding:4px 6px;border-radius:6px;}
-  select.green{color:var(--accent);}
-  .pill{border:1px solid var(--border);padding:6px 8px;border-radius:999px;background:#000;}
-  .pill.green{color:var(--accent);}
-  body.single .panels{grid-template-columns:1fr;}
-  body.single #panelB, body.single #recordBothSection{display:none;}
-  body.single #panelA{transform:scale(1.02);transition:transform .4s ease;}
-  input[type=range]{width:150px;}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px}
+
+  /* Header */
+  header.hero{display:flex;align-items:center;justify-content:space-between;padding:6px 0 16px}
+  .brand{font-weight:900;font-size:20px;display:flex;align-items:center;gap:10px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  .tag{color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px}
+
+  /* Buttons & UI */
+  .btn{border:1px solid var(--border);background:#000;color:var(--fg);padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.flat-green{background:var(--accent);border-color:var(--accent)}
+  .btn.flat-green:hover{background:#155324;border-color:#155324}
+  .btn.danger{background:#ff4b4b;border-color:#ff4b4b;color:#000}
+  .btn.danger:hover{background:#c83c3c;border-color:#c83c3c;color:#fff}
+  .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#000;color:var(--muted)}
+  .pill.green{color:var(--accent)}
+  select,input[type="number"]{background:#000;color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px}
+  select.green{color:var(--accent)}
+  input[type="range"]{appearance:none;height:4px;background:#1a1a1a;border-radius:999px;outline:none;width:160px}
+  input[type="range"]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:none;cursor:pointer}
+  .tiny{font-size:12px;color:var(--muted)}
+  .divider{height:1px;background:var(--border);margin:18px 0}
+
+  /* Panels */
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;transition:grid-template-columns .35s ease}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .35s ease,opacity .35s ease}
+  .panel header,.panel footer{padding:10px 12px;border-bottom:1px solid var(--border)}
+  .panel footer{border-top:1px solid var(--border);border-bottom:none}
+  .panel header .ttl{font-weight:800}
+  .panel header .tools,.panel footer .tools,.global{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .slot{position:relative;aspect-ratio:16/9;background:#000}
+  video{width:100%;height:100%;object-fit:contain;background:#000}
+  canvas.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:auto;z-index:2}
+
+  /* Single mode behavior */
+  body.single .panels{grid-template-columns:1fr}
+  body.single #panelB{opacity:0;transform:scale(.98);pointer-events:none;position:absolute;left:-9999px}
+  body.single #recordBothSection{display:none}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
-    <div class="brand"><span class="dot"></span>Hover Greens Studio</div>
-    <span class="tag">Matte • Minimal • Pro</span>
-  </header>
-
-  <section class="panel">
-    <header>
-      <span>Global Controls</span>
-      <div class="tools">
-        <label class="pill">Playback <input id="rate" type="range" min="0.1" max="1.0" step="0.05" value="0.5"></label>
-        <button class="btn" id="btnSync">Play/Pause Both</button>
-        <label class="pill green">Mode:
-          <select id="modeSelect" class="green">
-            <option value="dual" selected>Dual Camera</option>
-            <option value="single">Single Camera</option>
-          </select>
-        </label>
-      </div>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand"><span class="dot"></span>Hover Greens Studio</div>
+      <span class="tag">Matte • Minimal • Pro</span>
     </header>
-  </section>
 
-  <section class="panels">
-    <!-- Panel A -->
-    <div class="panel" id="panelA">
+    <!-- Global Controls -->
+    <section class="panel">
       <header>
-        <span>Angle A</span>
-        <div class="tools">
-          <button class="btn" data-cam>Use Camera</button>
-          <select class="drawMode">
-            <option value="off">Off</option>
-            <option value="line">Line</option>
-            <option value="circle">Circle</option>
-          </select>
-          <button class="btn" data-clear>Clear</button>
+        <span class="ttl">Global Controls</span>
+        <div class="global">
+          <label class="pill">Playback&nbsp;<input id="rate" type="range" min="0.1" max="1.0" step="0.05" value="0.35"></label>
+          <button class="btn" id="btnSync">Play/Pause Both</button>
+          <button class="btn" id="btnBack">◀︎ Frame</button>
+          <button class="btn" id="btnFwd">Frame ▶︎</button>
+          <label class="pill"><input type="checkbox" id="autoLoop" checked> Loop</label>
+          <label class="pill green">Mode:
+            <select id="modeSelect" class="green">
+              <option value="dual" selected>Dual Camera</option>
+              <option value="single">Single Camera</option>
+            </select>
+          </label>
         </div>
       </header>
-      <div class="slot">
-        <video class="vid" autoplay playsinline></video>
-        <canvas class="overlay"></canvas>
-      </div>
-    </div>
+    </section>
 
-    <!-- Panel B -->
-    <div class="panel" id="panelB">
+    <!-- Panels -->
+    <section class="panels" id="panelGrid">
+      <!-- A -->
+      <div class="panel" data-role="player" id="panelA">
+        <header>
+          <span class="ttl">Angle A</span>
+          <div class="tools">
+            <button class="btn" data-cam>Use Camera</button>
+            <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
+          </div>
+        </header>
+        <div class="slot">
+          <video class="vid" playsinline></video>
+          <canvas class="overlay"></canvas>
+        </div>
+        <footer>
+          <div class="tools">
+            <div class="group">
+              <button class="btn" data-play>Play</button>
+              <button class="btn" data-pause>Pause</button>
+              <button class="btn" data-back>◀︎ Frame</button>
+              <button class="btn" data-fwd>Frame ▶︎</button>
+              <button class="btn" data-clear>Clear Drawings</button>
+            </div>
+            <div class="group">
+              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+              <label class="pill">Draw:
+                <select class="drawMode">
+                  <option value="off">Off</option>
+                  <option value="line">Line</option>
+                  <option value="circle">Circle</option>
+                </select>
+              </label>
+              <button class="btn" data-rec>● Record</button>
+              <button class="btn danger" data-stop disabled>■ Stop</button>
+              <span class="tiny recStatus">Idle</span>
+            </div>
+          </div>
+        </footer>
+      </div>
+
+      <!-- B -->
+      <div class="panel" data-role="player" id="panelB">
+        <header>
+          <span class="ttl">Angle B</span>
+          <div class="tools">
+            <button class="btn" data-cam>Use Camera</button>
+            <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
+          </div>
+        </header>
+        <div class="slot">
+          <video class="vid" playsinline></video>
+          <canvas class="overlay"></canvas>
+        </div>
+        <footer>
+          <div class="tools">
+            <div class="group">
+              <button class="btn" data-play>Play</button>
+              <button class="btn" data-pause>Pause</button>
+              <button class="btn" data-back>◀︎ Frame</button>
+              <button class="btn" data-fwd>Frame ▶︎</button>
+              <button class="btn" data-clear>Clear Drawings</button>
+            </div>
+            <div class="group">
+              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+              <label class="pill">Draw:
+                <select class="drawMode">
+                  <option value="off">Off</option>
+                  <option value="line">Line</option>
+                  <option value="circle">Circle</option>
+                </select>
+              </label>
+              <button class="btn" data-rec>● Record</button>
+              <button class="btn danger" data-stop disabled>■ Stop</button>
+              <span class="tiny recStatus">Idle</span>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Record Both -->
+    <section class="panel" id="recordBothSection">
       <header>
-        <span>Angle B</span>
+        <span class="ttl">Record Both (Sync)</span>
         <div class="tools">
-          <button class="btn" data-cam>Use Camera</button>
-          <select class="drawMode">
-            <option value="off">Off</option>
-            <option value="line">Line</option>
-            <option value="circle">Circle</option>
-          </select>
-          <button class="btn" data-clear>Clear</button>
+          <label class="pill">Max Duration (s) <input type="number" id="maxDur" min="1" max="120" value="8" style="width:70px;text-align:center"></label>
+          <label class="pill"><input type="checkbox" id="autoPlayAfter" checked> Auto-play after record</label>
+          <button class="btn flat-green" id="recordBoth">● Record Both</button>
+          <button class="btn danger" id="stopBoth" disabled>■ Stop</button>
+          <span class="tiny" id="recStatus">Not recording</span>
         </div>
       </header>
-      <div class="slot">
-        <video class="vid" autoplay playsinline></video>
-        <canvas class="overlay"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel" id="recordBothSection" style="margin-top:16px;">
-    <header>
-      <span>Record Both (Sync)</span>
-      <div class="tools">
-        <button class="btn flat-green" id="recordBoth">● Record Both</button>
-        <button class="btn danger" id="stopBoth" disabled>■ Stop</button>
-      </div>
-    </header>
-  </section>
-</div>
+    </section>
+  </div>
 
 <script>
-(async function(){
-  const $ = (s,el=document)=>el.querySelector(s);
-  const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+(function(){
+  const $=(s,el=document)=>el.querySelector(s);
+  const $$=(s,el=document)=>[...el.querySelectorAll(s)];
+  const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
 
+  // Global refs
+  const rateGlobal = $('#rate');
+  const btnSync = $('#btnSync'), btnBack=$('#btnBack'), btnFwd=$('#btnFwd');
+  const autoLoop = $('#autoLoop');
   const modeSelect = $('#modeSelect');
-  modeSelect.addEventListener('change',()=>{
-    document.body.classList.toggle('single', modeSelect.value==='single');
-  });
 
-  async function startCam(video){
-    const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-    video.srcObject = stream;
-    video.play();
-  }
+  // Mode toggle (smooth layout)
+  function applyMode(mode){ document.body.classList.toggle('single', mode==='single'); }
+  modeSelect.addEventListener('change', ()=>applyMode(modeSelect.value));
+  applyMode(modeSelect.value);
 
-  // Drawing
-  function drawingLayer(overlay){
-    const ctx=overlay.getContext('2d');
-    const state={shapes:[],active:null,mode:'off'};
+  // Frame step helper
+  function step(video, dir=+1){ const dt = 1/60; video.pause(); video.currentTime = clamp(video.currentTime + dir*dt, 0, video.duration||1e9); }
+
+  // Drawing layer (red, no fill)
+  function makeDrawing(overlay){
+    const ctx = overlay.getContext('2d');
+    const state = {shapes:[], active:null, mode:'off'};
     function resize(){
-      overlay.width=overlay.clientWidth;
-      overlay.height=overlay.clientHeight;
-      redraw();
+      const r = overlay.getBoundingClientRect();
+      overlay.width = Math.max(2, Math.floor(r.width));
+      overlay.height = Math.max(2, Math.floor(r.height));
+      draw();
     }
-    window.addEventListener('resize',resize);
-    resize();
+    const ro = new ResizeObserver(resize); ro.observe(overlay);
 
-    function redraw(){
+    function draw(){
       ctx.clearRect(0,0,overlay.width,overlay.height);
-      ctx.strokeStyle='var(--stroke)';
-      ctx.lineWidth=3;
+      ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
+      ctx.strokeStyle = '#ff4b4b';
       for(const s of state.shapes){
-        if(s.type==='line'){
-          ctx.beginPath();
-          ctx.moveTo(s.a.x,s.a.y);
-          ctx.lineTo(s.b.x,s.b.y);
-          ctx.stroke();
-        }else if(s.type==='circle'){
-          ctx.beginPath();
-          ctx.arc(s.c.x,s.c.y,s.r,0,Math.PI*2);
-          ctx.stroke();
-        }
+        if(s.type==='line'){ ctx.beginPath(); ctx.moveTo(s.a.x,s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke(); }
+        if(s.type==='circle'){ ctx.beginPath(); ctx.arc(s.c.x, s.c.y, s.r, 0, Math.PI*2); ctx.stroke(); }
+      }
+      if(state.active){
+        ctx.setLineDash([8,6]);
+        if(state.active.type==='line'){ ctx.beginPath(); ctx.moveTo(state.active.a.x,state.active.a.y); ctx.lineTo(state.active.b.x,state.active.b.y); ctx.stroke(); }
+        if(state.active.type==='circle'){ ctx.beginPath(); ctx.arc(state.active.c.x, state.active.c.y, state.active.r, 0, Math.PI*2); ctx.stroke(); }
+        ctx.setLineDash([]);
       }
     }
-
-    function pos(e){
-      const r=overlay.getBoundingClientRect();
-      const x=(e.clientX-r.left)/r.width*overlay.width;
-      const y=(e.clientY-r.top)/r.height*overlay.height;
+    function pos(ev){
+      const r = overlay.getBoundingClientRect();
+      const x = ( (ev.clientX ?? ev.touches?.[0]?.clientX) - r.left ) / r.width * overlay.width;
+      const y = ( (ev.clientY ?? ev.touches?.[0]?.clientY) - r.top ) / r.height * overlay.height;
       return {x,y};
     }
-
-    overlay.addEventListener('pointerdown',e=>{
-      if(state.mode==='off')return;
-      const p=pos(e);
-      if(state.mode==='line') state.active={type:'line',a:p,b:p};
-      else if(state.mode==='circle') state.active={type:'circle',c:p,r:0};
-    });
-    overlay.addEventListener('pointermove',e=>{
-      if(!state.active)return;
-      const p=pos(e);
-      if(state.active.type==='line') state.active.b=p;
-      else if(state.active.type==='circle'){
-        const dx=p.x-state.active.c.x,dy=p.y-state.active.c.y;
-        state.active.r=Math.hypot(dx,dy);
-      }
-      redraw(); ctx.setLineDash([5,5]);
-      if(state.active.type==='line'){
-        ctx.beginPath(); ctx.moveTo(state.active.a.x,state.active.a.y);
-        ctx.lineTo(state.active.b.x,state.active.b.y); ctx.stroke();
-      }else if(state.active.type==='circle'){
-        ctx.beginPath(); ctx.arc(state.active.c.x,state.active.c.y,state.active.r,0,Math.PI*2); ctx.stroke();
-      }
-      ctx.setLineDash([]);
-    });
-    overlay.addEventListener('pointerup',()=>{
-      if(state.active){
-        if(state.active.type==='line') state.shapes.push(state.active);
-        else if(state.active.type==='circle') state.shapes.push(state.active);
-        state.active=null; redraw();
-      }
-    });
-    return{
-      setMode:m=>{state.mode=m;},
-      clear:()=>{state.shapes=[];redraw();}
+    function down(ev){
+      if(state.mode==='off') return;
+      ev.preventDefault();
+      const p = pos(ev);
+      state.active = state.mode==='line' ? {type:'line', a:p, b:p} : {type:'circle', c:p, r:0};
+      draw();
     }
+    function move(ev){
+      if(!state.active) return;
+      const p = pos(ev);
+      if(state.active.type==='line'){ state.active.b = p; }
+      else{ const dx=p.x-state.active.c.x, dy=p.y-state.active.c.y; state.active.r=Math.hypot(dx,dy); }
+      draw();
+    }
+    function up(){
+      if(!state.active) return;
+      if(state.active.type==='line'){ const {a,b}=state.active; if(Math.hypot(a.x-b.x,a.y-b.y)>2) state.shapes.push(state.active); }
+      else if(state.active.type==='circle'){ if(state.active.r>1) state.shapes.push(state.active); }
+      state.active=null; draw();
+    }
+    overlay.addEventListener('pointerdown', down);
+    overlay.addEventListener('pointermove', move);
+    overlay.addEventListener('pointerup', up);
+    overlay.addEventListener('pointerleave', up);
+    overlay.addEventListener('touchstart', down, {passive:false});
+    overlay.addEventListener('touchmove', move, {passive:false});
+    overlay.addEventListener('touchend', up);
+
+    resize();
+    return { setMode:(m)=>state.mode=m, clear:()=>{state.shapes.length=0; state.active=null; draw();}, redraw:draw };
   }
 
-  // Initialize both panels
-  $$('.panel').forEach(panel=>{
-    const video=$('.vid',panel);
-    const overlay=$('.overlay',panel);
-    const drawSel=$('.drawMode',panel);
-    const btnCam=$('[data-cam]',panel);
-    const btnClear=$('[data-clear]',panel);
-    if(!video)return;
-    const drawAPI=drawingLayer(overlay);
-    drawSel.addEventListener('change',()=>drawAPI.setMode(drawSel.value));
-    btnCam.addEventListener('click',()=>startCam(video));
-    btnClear.addEventListener('click',()=>drawAPI.clear());
+  // Panel init
+  function initPanel(panel){
+    const video = $('.vid', panel);
+    const overlay = $('.overlay', panel);
+    const drawSel = $('.drawMode', panel);
+    const btnCam = $('[data-cam]', panel);
+    const btnPlay = $('[data-play]', panel);
+    const btnPause = $('[data-pause]', panel);
+    const btnBack = $('[data-back]', panel);
+    const btnFwd = $('[data-fwd]', panel);
+    const rateLbl = $('.rate', panel);
+    const rateSlider = $('[data-rate]', panel);
+    const btnClear = $('[data-clear]', panel);
+    const btnRec = $('[data-rec]', panel);
+    const btnStop = $('[data-stop]', panel);
+    const recStatus = $('.recStatus', panel);
+
+    // Drawing
+    const drawAPI = makeDrawing(overlay);
+    drawSel.addEventListener('change', ()=>drawAPI.setMode(drawSel.value));
+
+    // Camera
+    async function startCam(){
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+        video.srcObject = stream; video.muted = true; await video.play();
+        panel.__player.stream = stream;
+      }catch(e){ console.error(e); alert('Camera permission denied or unavailable.'); }
+    }
+    btnCam.addEventListener('click', startCam);
+
+    // Controls
+    btnPlay.addEventListener('click', ()=>video.play());
+    btnPause.addEventListener('click', ()=>video.pause());
+    btnBack.addEventListener('click', ()=>step(video,-1));
+    btnFwd.addEventListener('click', ()=>step(video, 1));
+
+    // Rate
+    function applyGlobal(){ const r=parseFloat(rateGlobal.value); video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; }
+    applyGlobal();
+    rateSlider.addEventListener('input', ()=>{ video.playbackRate=parseFloat(rateSlider.value); rateLbl.textContent=video.playbackRate.toFixed(2)+'x'; });
+
+    // Per-panel recording
+    let rec=null, chunks=[];
+    function makeRecorder(stream, ondata){
+      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+               : MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
+      const r = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:6_000_000});
+      r.ondataavailable = e=>{ if(e.data && e.data.size) ondata(e.data); };
+      return r;
+    }
+    btnRec.addEventListener('click', async ()=>{
+      try{
+        if(!panel.__player.stream) await startCam();
+        chunks=[]; rec = makeRecorder(panel.__player.stream, d=>chunks.push(d));
+        rec.onstart=()=>{ btnRec.disabled=true; btnStop.disabled=false; recStatus.textContent='Recording…'; };
+        rec.onstop=()=>{
+          btnRec.disabled=false; btnStop.disabled=true; recStatus.textContent='Idle';
+          const blob = new Blob(chunks, {type: chunks[0]?.type || 'video/webm'});
+          const url = URL.createObjectURL(blob);
+          video.srcObject=null; video.src=url; video.loop = autoLoop.checked; video.load(); video.currentTime=0; video.play();
+        };
+        rec.start();
+      }catch(e){ console.error(e); alert('Unable to start recording.'); }
+    });
+    btnStop.addEventListener('click', ()=>{ try{ rec && rec.state!=='inactive' && rec.stop(); }catch{} });
+
+    // Expose API
+    panel.__player = {
+      video, overlay, drawAPI, stream:null,
+      setRate:(r)=>{ video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; },
+      step:(d)=>step(video,d)
+    };
+
+    // Clear drawings
+    btnClear.addEventListener('click', ()=>drawAPI.clear());
+  }
+
+  // Init both panels
+  $$('.panel[data-role="player"]').forEach(initPanel);
+
+  // Global controls
+  rateGlobal.addEventListener('input', ()=>{
+    const r=parseFloat(rateGlobal.value);
+    $$('.panel[data-role="player"]').forEach(p=>p.__player?.setRate(r));
+  });
+  btnSync.addEventListener('click', ()=>{
+    const vids = $$('.panel[data-role="player"] .vid');
+    const playAll = vids.some(v=>v.paused);
+    vids.forEach(v=>{ v.loop = autoLoop.checked; playAll ? v.play() : v.pause(); });
+  });
+  btnBack.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
+  btnFwd.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e)=>{
+    if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)) return;
+    if(e.code==='Space'){ e.preventDefault(); btnSync.click(); }
+    if(e.key===','){ e.preventDefault(); btnBack.click(); }
+    if(e.key==='.'){ e.preventDefault(); btnFwd.click(); }
   });
 
+  // Record Both (sync)
+  const recordBothBtn = $('#recordBoth'), stopBothBtn = $('#stopBoth'), recStatusBoth = $('#recStatus');
+  const autoPlayAfter = $('#autoPlayAfter'), maxDur = $('#maxDur');
+  let recA=null, recB=null, chunksA=[], chunksB=[], recTimer=null;
+
+  async function ensureBothStreams(){
+    const pA = $('#panelA'), pB = $('#panelB');
+    if(!pA.__player.stream){ await pA.querySelector('[data-cam]').click(); }
+    if(!pB.__player.stream){ await pB.querySelector('[data-cam]').click(); }
+  }
+  function makeRecorder(stream, ondata){
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+              : MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
+    const r = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:6_000_000});
+    r.ondataavailable = e=>{ if(e.data && e.data.size) ondata(e.data); };
+    return r;
+  }
+  function setBothUI(active){ recordBothBtn.disabled=active; stopBothBtn.disabled=!active; recStatusBoth.textContent = active?'Recording…':'Not recording'; }
+
+  async function startBoth(){
+    await ensureBothStreams();
+    const pA = $('#panelA').__player, pB = $('#panelB').__player;
+    chunksA=[]; chunksB=[];
+    recA = makeRecorder(pA.stream, d=>chunksA.push(d));
+    recB = makeRecorder(pB.stream, d=>chunksB.push(d));
+    recA.start(); recB.start();
+    setBothUI(true);
+    const dur = clamp(parseFloat(maxDur.value)||8, 1, 120);
+    recTimer = setTimeout(stopBoth, dur*1000);
+  }
+  function blobToVideo(video, blob){
+    const url = URL.createObjectURL(blob);
+    video.srcObject=null; video.src=url; video.loop=autoLoop.checked; video.load();
+  }
+  function syncAndPlay(){
+    const vA = $('#panelA').__player.video, vB = $('#panelB').__player.video;
+    const start = ()=>{
+      if(Number.isFinite(vA.duration) && vA.duration>0 && Number.isFinite(vB.duration) && vB.duration>0){
+        vA.currentTime=0; vB.currentTime=0;
+        const r=parseFloat(rateGlobal.value);
+        vA.playbackRate=r; vB.playbackRate=r;
+        if(autoPlayAfter.checked){ vA.play(); vB.play(); }
+      }else{ setTimeout(start, 60); }
+    };
+    start();
+  }
+  function stopBoth(){
+    try{ recA && recA.state!=='inactive' && recA.stop(); }catch{}
+    try{ recB && recB.state!=='inactive' && recB.stop(); }catch{}
+    clearTimeout(recTimer); recTimer=null; setBothUI(false);
+
+    const done={};
+    const finish=()=>{
+      if(done.a && done.b){
+        const vA = $('#panelA').__player.video, vB = $('#panelB').__player.video;
+        const blobA = new Blob(chunksA, {type: chunksA[0]?.type || 'video/webm'});
+        const blobB = new Blob(chunksB, {type: chunksB[0]?.type || 'video/webm'});
+        blobToVideo(vA, blobA); blobToVideo(vB, blobB); syncAndPlay();
+      }
+    };
+    if(recA) recA.onstop=()=>{ done.a=true; finish(); };
+    if(recB) recB.onstop=()=>{ done.b=true; finish(); };
+  }
+  recordBothBtn?.addEventListener('click', startBoth);
+  stopBothBtn?.addEventListener('click', stopBoth);
 })();
 </script>
 </body>
