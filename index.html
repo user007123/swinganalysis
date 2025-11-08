@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Digital Mirror Ultimate — Online</title>
+<style>
+  :root{
+    --bg:#0c0f13; --fg:#e8edf2; --muted:#a6b0bd; --brand:#4aa8ff; --brand-2:#9b7dff; --panel:#141922; --accent:#19d47a;
+    --border:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,rgba(154,125,255,.08),transparent),
+                    radial-gradient(900px 500px at 0% 100%,rgba(74,168,255,.10),transparent), var(--bg); color:var(--fg);
+             font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;}
+  a{color:var(--brand)}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px}
+  header.hero{
+    display:grid; gap:18px; padding:40px 0 20px; align-items:center;
+    grid-template-columns: 1.2fr .8fr;
+  }
+  @media (max-width: 960px){ header.hero{grid-template-columns:1fr; padding-top:24px} }
+  .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;
+       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); color:var(--muted); font-weight:600; font-size:12px; letter-spacing:.3px; text-transform:uppercase}
+  h1{font-size: clamp(28px, 4.5vw, 46px); line-height:1.1; margin:8px 0}
+  .sub{color:var(--muted); font-size:clamp(15px,1.5vw,18px)}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+  .btn{border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+       color:var(--fg); padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,var(--brand),var(--brand-2)); border:none}
+  .grid{display:grid; gap:16px}
+  .panels{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media (max-width: 960px){ .panels{grid-template-columns:1fr} }
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative}
+  .panel header{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02)}
+  .panel header .ttl{font-weight:700}
+  .panel .slot{position:relative; aspect-ratio:16/9; background:#0b0e13}
+  video{width:100%; height:100%; object-fit:contain; background:#000}
+  canvas.overlay{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none}
+  .panel footer{padding:10px 12px; border-top:1px solid var(--border); background:rgba(255,255,255,.02)}
+  .tools, .global{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .tools .group{display:flex; gap:8px; align-items:center}
+  .tiny{font-size:12px; color:var(--muted)}
+  .divider{height:1px; background:var(--border); margin:18px 0}
+  .pill{padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,.02)}
+  input[type="range"]{accent-color:var(--brand)}
+  .pulse{position:absolute; right:12px; top:10px; width:10px; height:10px; border-radius:50%; background:var(--accent);
+         box-shadow:0 0 0 8px rgba(25,212,122,.12); transform:translateZ(0); animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 8px rgba(25,212,122,.12)} 60%{box-shadow:0 0 0 16px rgba(25,212,122,.01)} 100%{box-shadow:0 0 0 8px rgba(25,212,122,.12)}}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0f1420; border:1px solid var(--border); padding:2px 6px; border-radius:6px}
+  .note{color:var(--muted); font-size:13px}
+  .floating-help{position:fixed; right:16px; bottom:16px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:10px 12px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div>
+        <span class="tag">JC Video • Digital Mirror Ultimate</span>
+        <h1>Touchless, multi-angle golf swing analysis — right in your browser.</h1>
+        <p class="sub">Upload or record swings, sync with pro examples, draw and measure, slow it down, and step frame-by-frame. No downloads. No logins.</p>
+        <div class="cta-row">
+          <button class="btn primary" id="ctaStart">Start Now</button>
+          <button class="btn" id="ctaAddAngle">Add Angle</button>
+          <span class="tiny">Tip: press <span class="kbd">Space</span> to Play/Pause, <span class="kbd">,</span>/<span class="kbd">.</span> to frame-step.</span>
+        </div>
+      </div>
+      <div class="panel" aria-label="Live preview">
+        <header><span class="ttl">Live Preview</span><span class="tiny">Drag to draw lines • Angle tool</span></header>
+        <div class="slot">
+          <video id="previewVideo" muted loop playsinline></video>
+          <canvas class="overlay" id="previewOverlay"></canvas>
+        </div>
+        <footer><div class="tools"><span class="note">Load your videos below to begin.</span></div></footer>
+      </div>
+    </header>
+
+    <section class="panel">
+      <header>
+        <span class="ttl">Global Controls</span>
+        <div class="global">
+          <label class="pill">Playback&nbsp;<input id="rate" type="range" min="0.1" max="1.0" step="0.05" value="0.35" /></label>
+          <button class="btn" id="btnSync">Play/Pause Both</button>
+          <button class="btn" id="btnBack">◀︎ Frame</button>
+          <button class="btn" id="btnFwd">Frame ▶︎</button>
+          <label class="pill">Draw
+            <select id="drawMode">
+              <option value="off">Off</option>
+              <option value="line">Line</option>
+              <option value="angle">Angle (2 lines)</option>
+            </select>
+          </label>
+          <button class="btn" id="btnClear">Clear Drawings</button>
+        </div>
+      </header>
+      <footer><span class="tiny">Playback rate applies to all players. Angle tool shows degrees between lines.</span></footer>
+    </section>
+
+    <section class="grid panels" id="panelGrid">
+      <!-- Left: Your Swing -->
+      <div class="panel" data-role="player" id="panelA">
+        <header>
+          <span class="ttl">Your Swing</span>
+          <div class="tools">
+            <label class="btn">Upload<input type="file" accept="video/*" hidden class="file"></label>
+            <button class="btn" data-cam>Use Camera</button>
+            <span class="pill tiny">Playback <span class="rate">1.0x</span></span>
+          </div>
+        </header>
+        <div class="slot">
+          <video class="vid" playsinline></video>
+          <canvas class="overlay"></canvas>
+        </div>
+        <footer>
+          <div class="tools">
+            <div class="group">
+              <button class="btn" data-play>Play</button>
+              <button class="btn" data-pause>Pause</button>
+              <button class="btn" data-back>◀︎ Frame</button>
+              <button class="btn" data-fwd>Frame ▶︎</button>
+            </div>
+            <div class="group">
+              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+              <button class="btn" data-clear>Clear</button>
+            </div>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Right: Pro Example -->
+      <div class="panel" data-role="player" id="panelB">
+        <header>
+          <span class="ttl">Pro Example</span>
+          <div class="tools">
+            <label class="btn">Upload<input type="file" accept="video/*" hidden class="file"></label>
+            <button class="btn" data-library>Load Sample</button>
+            <span class="pill tiny">Playback <span class="rate">1.0x</span></span>
+          </div>
+        </header>
+        <div class="slot">
+          <video class="vid" playsinline></video>
+          <canvas class="overlay"></canvas>
+        </div>
+        <footer>
+          <div class="tools">
+            <div class="group">
+              <button class="btn" data-play>Play</button>
+              <button class="btn" data-pause>Pause</button>
+              <button class="btn" data-back>◀︎ Frame</button>
+              <button class="btn" data-fwd>Frame ▶︎</button>
+            </div>
+            <div class="group">
+              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+              <button class="btn" data-clear>Clear</button>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="panel">
+      <header>
+        <span class="ttl">Add More Angles</span>
+        <div class="tools">
+          <button class="btn" id="addAngle">+ Add Video Angle</button>
+          <span class="tiny">Add as many angles as you want. Each panel has its own drawing layer and controls.</span>
+        </div>
+      </header>
+      <footer class="note">
+        For “touchless” sessions in-bay, use <b>Use Camera</b> on Panel A and enable continuous play; swing events can be marked by drawing or frame stepping.
+      </footer>
+    </section>
+
+    <div class="floating-help tiny">Shortcuts: <span class="kbd">Space</span> Play/Pause • <span class="kbd">,</span> back frame • <span class="kbd">.</span> forward frame</div>
+  </div>
+
+<script>
+(function(){
+  // --- Utilities
+  const $ = (sel, el=document)=>el.querySelector(sel);
+  const $$ = (sel, el=document)=>[...el.querySelectorAll(sel)];
+  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+
+  // --- Preview demo (optional loop)
+  const preview = $('#previewVideo');
+  const previewOverlay = $('#previewOverlay');
+  // Tiny animated overlay line to show "drawing"
+  const pctx = previewOverlay.getContext('2d');
+  function resizeCanvas(canvas){
+    const r = canvas.getBoundingClientRect();
+    canvas.width = Math.max(2, Math.floor(r.width));
+    canvas.height = Math.max(2, Math.floor(r.height));
+  }
+  const demoBlob = (()=>{ // create a 1s black mp4-like loop replacement using MediaSource? Simpler: skip video, just canvas pulse.
+    return null;
+  })();
+  resizeCanvas(previewOverlay);
+  let t=0;
+  (function drawPreview(){
+    resizeCanvas(previewOverlay);
+    pctx.clearRect(0,0,previewOverlay.width, previewOverlay.height);
+    pctx.strokeStyle = '#4aa8ff';
+    pctx.lineWidth = 3;
+    const w = previewOverlay.width, h = previewOverlay.height;
+    const x = (Math.sin(t/40)*.4+.5)*w*0.9;
+    pctx.beginPath(); pctx.moveTo(x, h*.2); pctx.lineTo(x, h*.8); pctx.stroke();
+    pctx.fillStyle = 'rgba(155,125,255,.25)';
+    pctx.beginPath(); pctx.arc(w*.6, h*.55, 36+6*Math.sin(t/12), 0, Math.PI*2); pctx.fill();
+    t++; requestAnimationFrame(drawPreview);
+  })();
+
+  // --- Player wiring
+  const globalRate = $('#rate');
+  const btnSync = $('#btnSync'), btnBack=$('#btnBack'), btnFwd=$('#btnFwd');
+  const drawModeSel = $('#drawMode'), btnClearAll = $('#btnClear');
+
+  const panelGrid = $('#panelGrid');
+  const templatePanel = (label='Angle')=>`
+    <div class="panel" data-role="player">
+      <header>
+        <span class="ttl">${label}</span>
+        <div class="tools">
+          <label class="btn">Upload<input type="file" accept="video/*" hidden class="file"></label>
+          <button class="btn" data-cam>Use Camera</button>
+          <span class="pill tiny">Playback <span class="rate">1.0x</span></span>
+        </div>
+      </header>
+      <div class="slot">
+        <video class="vid" playsinline></video>
+        <canvas class="overlay"></canvas>
+      </div>
+      <footer>
+        <div class="tools">
+          <div class="group">
+            <button class="btn" data-play>Play</button>
+            <button class="btn" data-pause>Pause</button>
+            <button class="btn" data-back>◀︎ Frame</button>
+            <button class="btn" data-fwd>Frame ▶︎</button>
+          </div>
+          <div class="group">
+            <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="${globalRate.value}" data-rate></label>
+            <button class="btn" data-clear>Clear</button>
+          </div>
+        </div>
+      </footer>
+    </div>`;
+
+  function timeStep(video, dir=+1){
+    // step by ~1 frame at 60fps (approx; better if we know exact FPS)
+    const step = 1/60;
+    video.pause();
+    video.currentTime = clamp(video.currentTime + dir*step, 0, video.duration || 1e9);
+  }
+
+  function initPanel(panel){
+    const video = $('.vid', panel);
+    const overlay = $('.overlay', panel);
+    const ctx = overlay.getContext('2d');
+    const rateLabel = $('.rate', panel);
+    const rateSlider = $('[data-rate]', panel);
+    const file = $('.file', panel);
+    const btnPlay = $('[data-play]', panel);
+    const btnPause = $('[data-pause]', panel);
+    const btnBack = $('[data-back]', panel);
+    const btnFwd = $('[data-fwd]', panel);
+    const btnCam = $('[data-cam]', panel);
+    const btnLoadSample = $('[data-library]', panel);
+    const btnClear = $('[data-clear]', panel);
+
+    // Resizing
+    const ro = new ResizeObserver(()=>resizeCanvas(overlay));
+    ro.observe(overlay);
+
+    // Loaders
+    file?.addEventListener('change', e=>{
+      const f = e.target.files[0]; if(!f) return;
+      const url = URL.createObjectURL(f);
+      video.src = url; video.load();
+    });
+    btnLoadSample?.addEventListener('click', ()=>{
+      // Provide a lightweight sample (public domain/placeholder). Users will replace with their own.
+      // Using a super-short data video is difficult; instead, prompt to pick a local file:
+      alert('Select a sample pro video file to compare.');
+      file?.click();
+    });
+
+    // Camera use
+    btnCam?.addEventListener('click', async ()=>{
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment', width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+        video.srcObject = stream; video.muted = true; await video.play();
+        panel.insertAdjacentHTML('beforeend','<span class="pulse" title="Camera live"></span>');
+      }catch(err){
+        console.error(err);
+        alert('Camera not available or permission denied.');
+      }
+    });
+
+    // Controls
+    btnPlay.addEventListener('click', ()=>video.play());
+    btnPause.addEventListener('click', ()=>video.pause());
+    btnBack.addEventListener('click', ()=>timeStep(video, -1));
+    btnFwd.addEventListener('click', ()=>timeStep(video, +1));
+
+    rateSlider.addEventListener('input', ()=>{
+      video.playbackRate = parseFloat(rateSlider.value);
+      rateLabel.textContent = video.playbackRate.toFixed(2)+'x';
+    });
+
+    // Sync with global rate updates
+    const applyGlobalRate = ()=>{ video.playbackRate = parseFloat(globalRate.value); rateSlider.value = globalRate.value; rateLabel.textContent = video.playbackRate.toFixed(2)+'x'; };
+    applyGlobalRate();
+
+    // Drawing
+    let drawState = { mode:'off', points:[], shapes:[] }; // shapes: [{type:'line', a:{x,y}, b:{x,y}}, {type:'angle', a,b,c}]
+    function px(ev){
+      const r = overlay.getBoundingClientRect();
+      const x = ( (ev.clientX ?? ev.touches?.[0]?.clientX) - r.left ) / r.width * overlay.width;
+      const y = ( (ev.clientY ?? ev.touches?.[0]?.clientY) - r.top ) / r.height * overlay.height;
+      return {x,y};
+    }
+    function redraw(){
+      resizeCanvas(overlay);
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+      ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
+      for(const s of drawState.shapes){
+        if(s.type==='line'){ ctx.strokeStyle = '#4aa8ff'; ctx.beginPath(); ctx.moveTo(s.a.x,s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke(); }
+        if(s.type==='angle'){
+          // draw two lines meeting at b, annotate angle at b
+          ctx.strokeStyle = '#9b7dff';
+          ctx.beginPath(); ctx.moveTo(s.b.x,s.b.y); ctx.lineTo(s.a.x,s.a.y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(s.b.x,s.b.y); ctx.lineTo(s.c.x,s.c.y); ctx.stroke();
+          // angle
+          const ang = angleBetween(s.b,s.a,s.c);
+          const label = `${ang.toFixed(1)}°`;
+          ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.strokeStyle='rgba(255,255,255,.35)';
+          ctx.beginPath(); ctx.arc(s.b.x, s.b.y, 22, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle='#fff'; ctx.font='bold 12px system-ui, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(label, s.b.x, s.b.y);
+        }
+      }
+      // live preview point(s)
+      if(drawState.points.length){
+        ctx.fillStyle='#19d47a';
+        for(const p of drawState.points){ ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); }
+      }
+    }
+    function angleBetween(B,A,C){
+      // angle ABC with vertex at B
+      const v1 = {x:A.x-B.x, y:A.y-B.y};
+      const v2 = {x:C.x-B.x, y:C.y-B.y};
+      const dot = v1.x*v2.x + v1.y*v2.y;
+      const m1 = Math.hypot(v1.x,v1.y), m2 = Math.hypot(v2.x,v2.y);
+      const cos = clamp(dot/(m1*m2+1e-9), -1, 1);
+      return (Math.acos(cos)*180/Math.PI);
+    }
+    function onDown(ev){
+      if(drawState.mode==='off') return;
+      ev.preventDefault();
+      const pt = px(ev);
+      drawState.points.push(pt);
+      if(drawState.mode==='line' && drawState.points.length===2){
+        drawState.shapes.push({type:'line', a:drawState.points[0], b:drawState.points[1]});
+        drawState.points=[];
+      }
+      if(drawState.mode==='angle' && drawState.points.length===3){
+        // order = A,B,C (vertex is middle point for better UX)
+        const [a,b,c] = drawState.points;
+        drawState.shapes.push({type:'angle', a, b, c});
+        drawState.points=[];
+      }
+      redraw();
+    }
+    function onMove(ev){
+      if(!drawState.points.length) return;
+      const pt = px(ev);
+      drawState.points[drawState.points.length-1] = pt;
+      redraw();
+    }
+
+    overlay.addEventListener('pointerdown', onDown);
+    overlay.addEventListener('pointermove', onMove);
+    overlay.addEventListener('touchstart', onDown, {passive:false});
+    overlay.addEventListener('touchmove', onMove, {passive:false});
+
+    // Hook global draw mode changes
+    function updateMode(){
+      drawState.mode = (window.__drawMode||'off');
+    }
+    window.addEventListener('dm_drawmode', updateMode);
+    updateMode();
+
+    // Clear
+    function clearDraw(){ drawState.points=[]; drawState.shapes=[]; redraw(); }
+    btnClear.addEventListener('click', clearDraw);
+
+    // Expose for global operations
+    panel.__player = { video, overlay, redraw, clearDraw, setRate:(r)=>{ video.playbackRate = r; rateSlider.value = r; rateLabel.textContent = r.toFixed(2)+'x'; }, step:(d)=>timeStep(video,d) };
+  }
+
+  // Initialize default two panels
+  $$('.panel[data-role="player"]').forEach(initPanel);
+
+  // Global rate control
+  globalRate.addEventListener('input', ()=>{
+    const r = parseFloat(globalRate.value);
+    $$('.panel[data-role="player"]').forEach(p=>p.__player?.setRate(r));
+  });
+
+  // Global draw mode
+  drawModeSel.addEventListener('change', ()=>{
+    window.__drawMode = drawModeSel.value;
+    window.dispatchEvent(new Event('dm_drawmode'));
+  });
+  window.__drawMode = drawModeSel.value;
+
+  // Global actions
+  btnSync.addEventListener('click', ()=>{
+    const vids = $$('.panel[data-role="player"] .vid');
+    // Toggle based on first video state
+    const playAll = vids.some(v=>v.paused);
+    vids.forEach(v=> playAll ? v.play() : v.pause());
+  });
+  btnBack.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
+  btnFwd.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
+  btnClearAll.addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.clearDraw());});
+
+  // Add angle panel
+  const addAngleBtn = $('#addAngle'); const ctaAddAngle = $('#ctaAddAngle');
+  function addPanel(){
+    const div = document.createElement('div');
+    div.innerHTML = templatePanel('Additional Angle');
+    const el = div.firstElementChild;
+    panelGrid.appendChild(el);
+    initPanel(el);
+  }
+  addAngleBtn.addEventListener('click', addPanel);
+  ctaAddAngle.addEventListener('click', addPanel);
+
+  // CTA Start → scroll to panels
+  $('#ctaStart').addEventListener('click', ()=>panelGrid.scrollIntoView({behavior:'smooth'}));
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e)=>{
+    if(e.target && ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if(e.code==='Space'){ e.preventDefault(); btnSync.click(); }
+    if(e.key===',' ){ e.preventDefault(); btnBack.click(); }
+    if(e.key==='.' ){ e.preventDefault(); btnFwd.click(); }
+  });
+})();
+</script>
+</body>
+</html>
