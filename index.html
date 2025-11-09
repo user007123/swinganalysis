@@ -62,7 +62,6 @@
   <div class="wrap">
     <header class="hero">
       <div class="brand"><span class="dot"></span>Hover Greens Studio</div>
-      <!-- tagline removed -->
     </header>
 
     <!-- Global Controls -->
@@ -77,7 +76,7 @@
           <label class="pill"><input type="checkbox" id="autoLoop" checked> Loop</label>
           <label class="pill green">Mode:
             <select id="modeSelect" class="green">
-              <option value="dual" selected>Dual Camera</option>
+              <option value="dual">Dual Camera</option>
               <option value="single">Single Camera</option>
             </select>
           </label>
@@ -93,9 +92,9 @@
           <span class="ttl">Angle A</span>
           <div class="tools">
             <span class="tiny">Camera:</span>
-            <select class="camSel"></select>
+            <select class="camSel" id="camSelA"></select>
             <button class="btn txt camRefresh">↻</button>
-            <button class="btn" data-cam>Use Camera</button>
+            <button class="btn" data-cam>Start Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
           </div>
         </header>
@@ -135,9 +134,9 @@
           <span class="ttl">Angle B</span>
           <div class="tools">
             <span class="tiny">Camera:</span>
-            <select class="camSel"></select>
+            <select class="camSel" id="camSelB"></select>
             <button class="btn txt camRefresh">↻</button>
-            <button class="btn" data-cam>Use Camera</button>
+            <button class="btn" data-cam>Start Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
           </div>
         </header>
@@ -195,16 +194,26 @@
   const $$=(s,el=document)=>[...el.querySelectorAll(s)];
   const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
 
+  // LocalStorage keys
+  const LS_MODE = 'hg_mode';
+  const LS_CAM_A = 'hg_camA';
+  const LS_CAM_B = 'hg_camB';
+
   // Global refs
   const rateGlobal = $('#rate');
   const btnSync = $('#btnSync'), btnBack=$('#btnBack'), btnFwd=$('#btnFwd');
   const autoLoop = $('#autoLoop');
   const modeSelect = $('#modeSelect');
 
-  // Mode toggle (smooth layout)
+  // Restore last mode
+  const savedMode = localStorage.getItem(LS_MODE) || 'dual';
+  modeSelect.value = savedMode;
+  applyMode(savedMode);
+  modeSelect.addEventListener('change', ()=>{
+    localStorage.setItem(LS_MODE, modeSelect.value);
+    applyMode(modeSelect.value);
+  });
   function applyMode(mode){ document.body.classList.toggle('single', mode==='single'); }
-  modeSelect.addEventListener('change', ()=>applyMode(modeSelect.value));
-  applyMode(modeSelect.value);
 
   // Frame step helper
   function step(video, dir=+1){ const dt=1/60; video.pause(); video.currentTime= Math.min((video.duration||1e9), Math.max(0, video.currentTime + dir*dt)); }
@@ -213,30 +222,35 @@
   let cachedCameras = [];
   async function enumerateCameras(){
     try{
-      // Ensure permission so labels appear
+      // Try to ensure labels are available
       await navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});
       const devs = await navigator.mediaDevices.enumerateDevices();
       cachedCameras = devs.filter(d=>d.kind==='videoinput');
     }catch(e){ console.warn(e); cachedCameras=[]; }
     return cachedCameras;
   }
+
   async function populateCameraDropdowns(){
     const cams = await enumerateCameras();
-    $$('.panel[data-role="player"]').forEach((panel,i)=>{
+    const map = {panelA: localStorage.getItem(LS_CAM_A), panelB: localStorage.getItem(LS_CAM_B)};
+    [['#panelA', LS_CAM_A], ['#panelB', LS_CAM_B]].forEach(([pid, key], idx)=>{
+      const panel = $(pid);
       const sel = panel.querySelector('.camSel');
-      if(!sel) return;
       const prev = sel.value;
       sel.innerHTML='';
-      cams.forEach((c,idx)=>{
+      cams.forEach((c,i)=>{
         const o=document.createElement('option');
         o.value = c.deviceId || '';
-        o.textContent = c.label || `Camera ${idx+1}`;
+        o.textContent = c.label || `Camera ${i+1}`;
         sel.appendChild(o);
       });
-      // default to i-th camera if exists, else first
+      const stored = localStorage.getItem(key);
       if(cams.length){
-        const target = (i < cams.length) ? cams[i].deviceId : cams[0].deviceId;
-        sel.value = prev && [...sel.options].some(o=>o.value===prev) ? prev : target;
+        // Prefer stored -> previous -> index default
+        const target = stored && [...sel.options].some(o=>o.value===stored) ? stored
+                    : prev && [...sel.options].some(o=>o.value===prev) ? prev
+                    : (idx < cams.length ? cams[idx].deviceId : cams[0].deviceId);
+        sel.value = target || '';
       }
     });
   }
@@ -307,7 +321,7 @@
   }
 
   // Panel init
-  function initPanel(panel){
+  function initPanel(panel, which){
     const video = panel.querySelector('.vid');
     const overlay = panel.querySelector('.overlay');
     const drawSel = panel.querySelector('.drawMode');
@@ -325,6 +339,8 @@
     const camSel = panel.querySelector('.camSel');
     const camRefresh = panel.querySelector('.camRefresh');
 
+    const LS_KEY = which==='A' ? LS_CAM_A : LS_CAM_B;
+
     // Drawing
     const drawAPI = makeDrawing(overlay);
     drawSel.addEventListener('change', ()=>drawAPI.setMode(drawSel.value));
@@ -339,10 +355,12 @@
         currentStream = stream;
         video.srcObject = stream; video.muted = true; await video.play();
         panel.__player.stream = stream;
+        if(deviceId) localStorage.setItem(LS_KEY, deviceId);
       }catch(e){ console.error(e); alert('Camera permission denied or camera unavailable.'); }
     }
     btnCam.addEventListener('click', ()=>startCamWith(camSel.value || undefined));
     camSel.addEventListener('change', ()=>{
+      localStorage.setItem(LS_KEY, camSel.value || '');
       if(panel.__player?.stream) startCamWith(camSel.value || undefined);
     });
     camRefresh.addEventListener('click', populateCameraDropdowns);
@@ -387,39 +405,51 @@
     panel.__player = {
       video, overlay, drawAPI, stream:null,
       setRate:(r)=>{ video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; },
-      step:(d)=>{ const dt=1/60; video.pause(); video.currentTime=Math.min((video.duration||1e9), Math.max(0, video.currentTime + d*dt)); }
+      step:(d)=>{ const dt=1/60; video.pause(); video.currentTime=Math.min((video.duration||1e9), Math.max(0, video.currentTime + d*dt)); },
+      startCamWith, camSel
     };
 
-    // Clear drawings
-    btnClear.addEventListener('click', ()=>drawAPI.clear());
+    // Auto-start last camera on load (if stored)
+    const storedCam = localStorage.getItem(LS_KEY);
+    if(storedCam){ // kick off immediately; browser may prompt if needed
+      // Wait a tick so dropdowns are populated first by outer init
+      setTimeout(()=>startCamWith(storedCam), 50);
+    }
   }
 
   // Init both panels
-  $$('.panel[data-role="player"]').forEach(initPanel);
+  const panelA = $('#panelA'), panelB = $('#panelB');
 
-  // Populate camera selects and allow refresh
-  populateCameraDropdowns();
+  // Populate camera selects and init panels
+  (async function boot(){
+    await populateCameraDropdowns();
+    initPanel(panelA, 'A');
+    initPanel(panelB, 'B');
 
-  // Global controls
-  rateGlobal.addEventListener('input', ()=>{
-    const r=parseFloat(rateGlobal.value);
-    $$('.panel[data-role="player"]').forEach(p=>p.__player?.setRate(r));
-  });
-  $('#btnSync').addEventListener('click', ()=>{
-    const vids = $$('.panel[data-role="player"] .vid');
-    const playAll = vids.some(v=>v.paused);
-    vids.forEach(v=>{ v.loop = autoLoop.checked; playAll ? v.play() : v.pause(); });
-  });
-  $('#btnBack').addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(-1));});
-  $('#btnFwd').addEventListener('click', ()=>{$$('.panel[data-role="player"]').forEach(p=>p.__player?.step(+1));});
+    // If there was no stored camera but we still want to resume last state:
+    // (Nothing else to do; user can click Start Camera or choose a device.)
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', (e)=>{
-    if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)) return;
-    if(e.code==='Space'){ e.preventDefault(); $('#btnSync').click(); }
-    if(e.key===','){ e.preventDefault(); $('#btnBack').click(); }
-    if(e.key==='.'){ e.preventDefault(); $('#btnFwd').click(); }
-  });
+    // Global controls
+    rateGlobal.addEventListener('input', ()=>{
+      const r=parseFloat(rateGlobal.value);
+      [panelA, panelB].forEach(p=>p.__player?.setRate(r));
+    });
+    $('#btnSync').addEventListener('click', ()=>{
+      const vids = $$('.panel[data-role="player"] .vid');
+      const playAll = vids.some(v=>v.paused);
+      vids.forEach(v=>{ v.loop = autoLoop.checked; playAll ? v.play() : v.pause(); });
+    });
+    $('#btnBack').addEventListener('click', ()=>{ [panelA, panelB].forEach(p=>p.__player?.step(-1)); });
+    $('#btnFwd').addEventListener('click', ()=>{ [panelA, panelB].forEach(p=>p.__player?.step(+1)); });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{
+      if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)) return;
+      if(e.code==='Space'){ e.preventDefault(); $('#btnSync').click(); }
+      if(e.key===','){ e.preventDefault(); $('#btnBack').click(); }
+      if(e.key==='.'){ e.preventDefault(); $('#btnFwd').click(); }
+    });
+  })();
 
   // Record Both (sync)
   const recordBothBtn = $('#recordBoth'), stopBothBtn = $('#stopBoth'), recStatusBoth = $('#recStatus');
@@ -427,9 +457,8 @@
   let recA=null, recB=null, chunksA=[], chunksB=[], recTimer=null;
 
   async function ensureBothStreams(){
-    const pA = $('#panelA'), pB = $('#panelB');
-    if(!pA.__player.stream){ pA.querySelector('[data-cam]').click(); }
-    if(!pB.__player.stream){ pB.querySelector('[data-cam]').click(); }
+    if(!panelA.__player.stream){ panelA.querySelector('[data-cam]').click(); }
+    if(!panelB.__player.stream){ panelB.querySelector('[data-cam]').click(); }
   }
   function makeRecorder(stream, ondata){
     const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
@@ -442,7 +471,7 @@
 
   async function startBoth(){
     await ensureBothStreams();
-    const pA = $('#panelA').__player, pB = $('#panelB').__player;
+    const pA = panelA.__player, pB = panelB.__player;
     chunksA=[]; chunksB=[];
     recA = makeRecorder(pA.stream, d=>chunksA.push(d));
     recB = makeRecorder(pB.stream, d=>chunksB.push(d));
@@ -456,7 +485,7 @@
     video.srcObject=null; video.src=url; video.loop=autoLoop.checked; video.load();
   }
   function syncAndPlay(){
-    const vA = $('#panelA').__player.video, vB = $('#panelB').__player.video;
+    const vA = panelA.__player.video, vB = panelB.__player.video;
     const start = ()=>{
       if(Number.isFinite(vA.duration) && vA.duration>0 && Number.isFinite(vB.duration) && vB.duration>0){
         vA.currentTime=0; vB.currentTime=0;
@@ -475,7 +504,7 @@
     const done={};
     const finish=()=>{
       if(done.a && done.b){
-        const vA = $('#panelA').__player.video, vB = $('#panelB').__player.video;
+        const vA = panelA.__player.video, vB = panelB.__player.video;
         const blobA = new Blob(chunksA, {type: chunksA[0]?.type || 'video/webm'});
         const blobB = new Blob(chunksB, {type: chunksB[0]?.type || 'video/webm'});
         blobToVideo(vA, blobA); blobToVideo(vB, blobB); syncAndPlay();
