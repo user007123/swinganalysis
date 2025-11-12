@@ -27,122 +27,80 @@ body.single #recordBothSection{display:none}
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="brand"><span class="dot"></span>Hover Greens Studio</div></header>
+<header class="hero"><div class="brand"><span class="dot"></span>Hover Greens Studio</div></header>
 
-  <section class="panel">
-    <header><span class="ttl">Global Controls</span>
-      <div class="global">
-        <label class="pill">Playback <input id="rate" type="range" min="0.1" max="1" step="0.05" value="0.35"></label>
-        <button class="btn" id="btnSync">Play/Pause Both</button>
-        <button class="btn" id="btnBack">◀︎ Frame</button>
-        <button class="btn" id="btnFwd">Frame ▶︎</button>
-        <label class="pill"><input type="checkbox" id="autoLoop" checked> Loop</label>
-        <label class="pill green">Mode:<select id="modeSelect" class="green"><option value="dual">Dual</option><option value="single">Single</option></select></label>
-        <label class="pill"><input type="checkbox" id="autoRecordToggle"> Auto Record</label>
-        <span id="autoRecordLight" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:#555;margin-left:4px"></span>
-      </div>
-    </header>
-  </section>
+<section class="panel">
+<header><span class="ttl">Global Controls</span>
+<div class="global">
+<label class="pill">Playback <input id="rate" type="range" min="0.1" max="1" step="0.05" value="0.35"></label>
+<button class="btn" id="btnSync">Play/Pause Both</button>
+<button class="btn" id="btnBack">◀︎ Frame</button><button class="btn" id="btnFwd">Frame ▶︎</button>
+<label class="pill"><input type="checkbox" id="autoLoop" checked> Loop</label>
+<label class="pill green">Mode:<select id="modeSelect" class="green"><option value="dual">Dual</option><option value="single">Single</option></select></label>
+<label class="pill"><input type="checkbox" id="autoRecordToggle"> Auto Record</label>
+<span id="autoRecordLight" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:#555;margin-left:4px"></span>
+<div style="display:flex;align-items:center;gap:6px;">
+  <div id="soundMeterWrap" style="width:100px;height:8px;background:#222;border-radius:4px;overflow:hidden;">
+    <div id="soundMeter" style="width:0;height:100%;background:#1E7030;transition:width .05s linear;"></div>
+  </div>
+  <span class="tiny" id="soundLabel">0.00</span>
+</div>
+</div></header>
+</section>
 
-  <section class="panels">
-    <div class="panel" data-role="player" id="panelA">
-      <header><span class="ttl">Angle A</span>
-        <div class="tools">
-          <span class="tiny">Camera:</span>
-          <select class="camSel"></select>
-          <button class="btn txt camRefresh">↻</button>
-          <button class="btn" data-cam>Start Camera</button>
-          <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
-        </div>
-      </header>
-      <div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
-      <footer><div class="tools">
-        <div><button class="btn" data-play>Play</button><button class="btn" data-pause>Pause</button><button class="btn" data-back>◀︎</button><button class="btn" data-fwd>▶︎</button><button class="btn" data-clear>Clear</button></div>
-        <div><label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
-          <label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
-          <button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span>
-        </div></div>
-      </footer>
-    </div>
+<section class="panels">
+<div class="panel" data-role="player" id="panelA">
+<header><span class="ttl">Angle A</span>
+<div class="tools"><span class="tiny">Camera:</span><select class="camSel"></select><button class="btn txt camRefresh">↻</button>
+<button class="btn" data-cam>Start Camera</button><span class="pill tiny">Playback <span class="rate">1.00x</span></span></div></header>
+<div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
+<footer><div class="tools"><div><button class="btn" data-play>Play</button><button class="btn" data-pause>Pause</button>
+<button class="btn" data-back>◀︎</button><button class="btn" data-fwd>▶︎</button><button class="btn" data-clear>Clear</button></div>
+<div><label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
+<label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
+<button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span></div></div></footer></div>
 
-    <div class="panel" data-role="player" id="panelB">
-      <header><span class="ttl">Angle B</span>
-        <div class="tools">
-          <span class="tiny">Camera:</span>
-          <select class="camSel"></select>
-          <button class="btn txt camRefresh">↻</button>
-          <button class="btn" data-cam>Start Camera</button>
-          <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
-        </div>
-      </header>
-      <div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
-      <footer><div class="tools">
-        <div><button class="btn" data-play>Play</button><button class="btn" data-pause>Pause</button><button class="btn" data-back>◀︎</button><button class="btn" data-fwd>▶︎</button><button class="btn" data-clear>Clear</button></div>
-        <div><label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
-          <label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
-          <button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span>
-        </div></div>
-      </footer>
-    </div>
-  </section>
+<div class="panel" data-role="player" id="panelB">
+<header><span class="ttl">Angle B</span>
+<div class="tools"><span class="tiny">Camera:</span><select class="camSel"></select><button class="btn txt camRefresh">↻</button>
+<button class="btn" data-cam>Start Camera</button><span class="pill tiny">Playback <span class="rate">1.00x</span></span></div></header>
+<div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
+<footer><div class="tools"><div><button class="btn" data-play>Play</button><button class="btn" data-pause>Pause</button>
+<button class="btn" data-back>◀︎</button><button class="btn" data-fwd>▶︎</button><button class="btn" data-clear>Clear</button></div>
+<div><label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
+<label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
+<button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span></div></div></footer></div>
+</section>
 
-  <div class="divider"></div>
-  <section class="panel" id="recordBothSection">
-    <header><span class="ttl">Record Both</span>
-      <div class="tools">
-        <label class="pill">Max Dur <input type="number" id="maxDur" min="1" max="120" value="8" style="width:70px;text-align:center"></label>
-        <label class="pill"><input type="checkbox" id="autoPlayAfter" checked> Auto Play</label>
-        <button class="btn" id="recordBoth">● Record Both</button>
-        <button class="btn danger" id="stopBoth" disabled>■</button>
-        <span class="tiny" id="recStatus">Idle</span>
-      </div>
-    </header>
-  </section>
+<div class="divider"></div>
+<section class="panel" id="recordBothSection"><header><span class="ttl">Record Both</span>
+<div class="tools"><label class="pill">Max Dur <input type="number" id="maxDur" min="1" max="120" value="8" style="width:70px;text-align:center"></label>
+<label class="pill"><input type="checkbox" id="autoPlayAfter" checked> Auto Play</label>
+<button class="btn" id="recordBoth">● Record Both</button><button class="btn danger" id="stopBoth" disabled>■</button><span class="tiny" id="recStatus">Idle</span></div></header></section>
 </div>
 
 <script>
 (function(){
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
-const rateGlobal=$('#rate'),btnSync=$('#btnSync'),btnBack=$('#btnBack'),btnFwd=$('#btnFwd'),autoLoop=$('#autoLoop'),modeSelect=$('#modeSelect');
-const autoToggle=$('#autoRecordToggle'),autoLight=$('#autoRecordLight');let autoActive=false;autoToggle.onchange=()=>{autoActive=autoToggle.checked;autoLight.style.background=autoActive?'#1E7030':'#555';};
+const modeSelect=$('#modeSelect'),autoToggle=$('#autoRecordToggle'),autoLight=$('#autoRecordLight');let autoActive=false;
+autoToggle.onchange=()=>{autoActive=autoToggle.checked;autoLight.style.background=autoActive?'#1E7030':'#555';};
 function applyMode(m){document.body.classList.toggle('single',m==='single');}modeSelect.onchange=()=>applyMode(modeSelect.value);applyMode(modeSelect.value);
 
 function makeDrawing(c){const x=c.getContext('2d');const s={shapes:[],a:null,m:'off'};function R(){c.width=c.clientWidth;c.height=c.clientHeight;x.clearRect(0,0,c.width,c.height);x.lineWidth=3;x.strokeStyle='#ff4b4b';for(const t of s.shapes){x.beginPath();if(t.t==='l'){x.moveTo(t.a.x,t.a.y);x.lineTo(t.b.x,t.b.y);}else{x.arc(t.c.x,t.c.y,t.r,0,2*Math.PI);}x.stroke();}}const P=e=>{const r=c.getBoundingClientRect(),X=((e.clientX??e.touches[0]?.clientX)-r.left)/r.width*c.width,Y=((e.clientY??e.touches[0]?.clientY)-r.top)/r.height*c.height;return{x:X,y:Y}};function Dn(e){if(s.m==='off')return;const a=P(e);s.a=s.m==='l'?{t:'l',a:a,b:a}:{t:'c',c:a,r:0};R();}function Mv(e){if(!s.a)return;const b=P(e);if(s.a.t==='l')s.a.b=b;else s.a.r=Math.hypot(b.x-s.a.c.x,b.y-s.a.c.y);R();}function Up(){if(s.a){s.shapes.push(s.a);s.a=null;R();}}c.onpointerdown=Dn;c.onpointermove=Mv;c.onpointerup=Up;window.addEventListener('resize',R);return{setMode:m=>s.m=m[0],clear:()=>{s.shapes=[];R();}};}
-
-$$('.panel[data-role=player]').forEach(p=>initPanel(p));
-async function populateCams(){try{await navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});}catch{} const cams=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');$$('.camSel').forEach((s,i)=>{s.innerHTML='';cams.forEach((c,ci)=>{const o=document.createElement('option');o.value=c.deviceId;o.textContent=c.label||`Cam ${ci+1}`;s.appendChild(o);});});}
+async function populateCams(){try{await navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});}catch{}const cams=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');$$('.camSel').forEach((s)=>{s.innerHTML='';cams.forEach((c,ci)=>{const o=document.createElement('option');o.value=c.deviceId;o.textContent=c.label||`Cam ${ci+1}`;s.appendChild(o);});});}
 populateCams();
 
-function initPanel(p){
-  const v=$('.vid',p),o=$('.overlay',p),m=$('.drawMode',p),bC=$('[data-cam]',p),bR=$('[data-rec]',p),bS=$('[data-stop]',p),rS=$('.recStatus',p),sel=$('.camSel',p),rfr=$('.camRefresh',p),rateLbl=$('.rate',p),rateSlider=$('[data-rate]',p);
-  const D=makeDrawing(o);m.onchange=()=>D.setMode(m.value);
-  let strm=null;async function startCam(id){try{const s=await navigator.mediaDevices.getUserMedia({video:id?{deviceId:{exact:id}}:true,audio:false});if(strm)strm.getTracks().forEach(t=>t.stop());v.srcObject=s;v.muted=true;await v.play();strm=s;p.__player={video:v,stream:s,draw:D,motionDetected:false};}catch(e){alert('Camera error');}}
-  bC.onclick=()=>startCam(sel.value||undefined);rfr.onclick=populateCams;
-  $('[data-play]',p).onclick=()=>v.play();$('[data-pause]',p).onclick=()=>v.pause();$('[data-back]',p).onclick=()=>{v.pause();v.currentTime=Math.max(0,v.currentTime-1/60)};$('[data-fwd]',p).onclick=()=>{v.pause();v.currentTime=Math.min(v.duration||1e9,v.currentTime+1/60)};
-  function applyRate(r){v.playbackRate=r;rateSlider.value=r;rateLbl.textContent=r.toFixed(2)+'x';}applyRate(parseFloat(rateGlobal.value)||1);rateSlider.oninput=()=>applyRate(parseFloat(rateSlider.value)||1);
-  let rec=null,ch=[];bR.onclick=()=>{if(!strm){alert('Start camera');return;}ch=[];rec=new MediaRecorder(strm);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};rec.onstop=()=>{const B=new Blob(ch);v.srcObject=null;v.src=URL.createObjectURL(B);v.loop=autoLoop.checked;v.play();};rec.start();rS.textContent='Recording…';setTimeout(()=>{try{rec.stop()}catch{}rS.textContent='Idle';},3000);};bS.onclick=()=>{try{rec&&rec.stop()}catch{}rS.textContent='Idle'};
-  p.__player={video:v,stream:strm,draw:D,motionDetected:false};
-}
-
-const recordBothBtn=$('#recordBoth'),stopBothBtn=$('#stopBoth'),recStatusBoth=$('#recStatus'),autoPlayAfter=$('#autoPlayAfter'),maxDur=$('#maxDur');
-let recA,recB,chA=[],chB=[],recTimer=null;
-function makeRec(s,on){const r=new MediaRecorder(s);r.ondataavailable=e=>{if(e.data.size)on(e.data)};return r;}
-function setBothUI(a){recordBothBtn.disabled=a;stopBothBtn.disabled=!a;recStatusBoth.textContent=a?'Recording…':'Idle';}
-recordBothBtn.onclick=()=>{const pA=$('#panelA').__player,pB=$('#panelB').__player;if(!pA?.stream||!pB?.stream){alert('Start both cameras');return;}chA=[];chB=[];recA=makeRec(pA.stream,d=>chA.push(d));recB=makeRec(pB.stream,d=>chB.push(d));recA.start();recB.start();setBothUI(true);recTimer=setTimeout(stopBoth,Math.min(Math.max(parseFloat(maxDur.value)||8,1),120)*1000);};
-function stopBoth(){try{recA&&recA.state!=='inactive'&&recA.stop()}catch{}try{recB&&recB.state!=='inactive'&&recB.stop()}catch{}clearTimeout(recTimer);recTimer=null;setBothUI(false);let aDone=false,bDone=false;function finish(){if(!(aDone&&bDone))return;const vA=$('#panelA').__player.video,vB=$('#panelB').__player.video;const bA=new Blob(chA),bB=new Blob(chB);vA.srcObject=null;vA.src=URL.createObjectURL(bA);vB.srcObject=null;vB.src=URL.createObjectURL(bB);if(autoPlayAfter.checked){vA.play();vB.play();}}recA.onstop=()=>{aDone=true;finish()};recB.onstop=()=>{bDone=true;finish()};}
-stopBothBtn.onclick=stopBoth;
-
-rateGlobal.oninput=()=>{const r=parseFloat(rateGlobal.value)||1;$$('.panel[data-role=player]').forEach(p=>{const v=p.__player?.video;if(v){v.playbackRate=r;const lbl=$('.rate',p),sl=$('[data-rate]',p);if(sl)sl.value=r;if(lbl)lbl.textContent=r.toFixed(2)+'x';}});};
-btnSync.onclick=()=>{$$('video').forEach(v=>{v.loop=autoLoop.checked;v.paused?v.play():v.pause();});};
-btnBack.onclick=()=>{$$('video').forEach(v=>{v.pause();v.currentTime=Math.max(0,v.currentTime-1/60);});};
-btnFwd.onclick=()=>{$$('video').forEach(v=>{v.pause();v.currentTime=Math.min(v.duration||1e9,v.currentTime+1/60);});};
-
-async function initSoundTrigger(){try{const C=new (window.AudioContext||window.webkitAudioContext)();const mic=await navigator.mediaDevices.getUserMedia({audio:true});const src=C.createMediaStreamSource(mic);const an=C.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.fftSize);let last=0;const TH=0.08,COOL=2000,CLIP=3000;function rms(){an.getByteTimeDomainData(d);let s=0;for(let i=0;i<d.length;i++){const v=(d[i]-128)/128;s+=v*v;}return Math.sqrt(s/d.length);}function trigger(){const n=performance.now();if(n-last<COOL)return;last=n;const recent=[...$$('.panel[data-role=player]')].some(p=>p.__player&&p.__player.motionDetected);if(!recent)return;$$('.panel[data-role=player]').forEach(p=>{const pl=p.__player;if(!pl||!pl.stream)return;const ch=[];const rec=new MediaRecorder(pl.stream);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};rec.onstop=()=>{const b=new Blob(ch);pl.video.srcObject=null;pl.video.src=URL.createObjectURL(b);pl.video.loop=autoLoop.checked;pl.video.play();};rec.start();setTimeout(()=>{try{rec.stop()}catch{}},CLIP);});}
-(function listen(){if(autoActive&&rms()>TH)trigger();requestAnimationFrame(listen);})();}catch(e){console.warn('mic init',e);}}
-initSoundTrigger();
+$$('.panel[data-role=player]').forEach(p=>initPanel(p));
+function initPanel(p){const v=$('.vid',p),o=$('.overlay',p),m=$('.drawMode',p),bC=$('[data-cam]',p),bR=$('[data-rec]',p),rS=$('.recStatus',p),sel=$('.camSel',p),rfr=$('.camRefresh',p);const D=makeDrawing(o);m.onchange=()=>D.setMode(m.value);let strm=null;async function startCam(id){try{const s=await navigator.mediaDevices.getUserMedia({video:id?{deviceId:{exact:id}}:true,audio:false});if(strm)strm.getTracks().forEach(t=>t.stop());v.srcObject=s;v.muted=true;await v.play();strm=s;p.__player={video:v,stream:s,draw:D,motionDetected:false};}catch(e){alert('Camera error');}}bC.onclick=()=>startCam(sel.value||undefined);rfr.onclick=populateCams;let rec=null,ch=[];bR.onclick=()=>{if(!p.__player?.stream){alert('Start camera');return;}ch=[];rec=new MediaRecorder(p.__player.stream);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};rec.onstop=()=>{const B=new Blob(ch);v.srcObject=null;v.src=URL.createObjectURL(B);v.loop=true;v.play();};rec.start();rS.textContent='Recording…';setTimeout(()=>{try{rec.stop()}catch{}rS.textContent='Idle';},3000);};p.__player={video:v,stream:strm,draw:D,motionDetected:false};}
 
 function initMotionDetection(){const W=64,H=36,TH=15,INT=100;$$('.panel[data-role=player]').forEach(p=>{const v=$('.vid',p);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');let prev=null,lastM=0;function loop(){if(v.readyState>=2){x.drawImage(v,0,0,W,H);const f=x.getImageData(0,0,W,H).data;let diff=0;if(prev){for(let i=0;i<f.length;i+=4){const a=(f[i]+f[i+1]+f[i+2])/3,b=(prev[i]+prev[i+1]+prev[i+2])/3;diff+=Math.abs(a-b);}diff/=W*H;if(diff>TH){lastM=performance.now();p.__player.motionDetected=true}else{p.__player.motionDetected=(performance.now()-lastM<500)}}prev=f;}setTimeout(loop,INT);}loop();});}
 initMotionDetection();
+
+async function initSoundTrigger(){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const mic=await navigator.mediaDevices.getUserMedia({audio:true});const src=ctx.createMediaStreamSource(mic);const an=ctx.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.fftSize);const TH=0.12,COOL=2000;let last=0;const bar=$('#soundMeter'),label=$('#soundLabel');
+function rms(){an.getByteTimeDomainData(d);let s=0;for(let i=0;i<d.length;i++){const v=(d[i]-128)/128;s+=v*v;}return Math.sqrt(s/d.length);}
+function trigger(){const now=performance.now();if(now-last<COOL)return;last=now;const recent=[...$$('.panel[data-role=player]')].some(p=>p.__player&&p.__player.motionDetected);if(!recent)return;$$('[data-rec]').forEach(btn=>{const pl=btn.closest('.panel').__player;if(pl&&pl.stream)btn.click();});bar.style.background='#ff4b4b';setTimeout(()=>bar.style.background='#1E7030',200);}
+(function listen(){const level=rms();label.textContent=level.toFixed(2);bar.style.width=Math.min(level*100,100)+'%';if(autoActive&&level>TH)trigger();requestAnimationFrame(listen);})();}catch(e){console.warn('mic init',e);}}
+initSoundTrigger();
 })();
 </script>
 </body>
