@@ -20,21 +20,23 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;b
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .35s ease,opacity .35s ease}
 .panel header,.panel footer{padding:10px 12px;border-bottom:1px solid var(--border)}.panel footer{border-top:1px solid var(--border);border-bottom:none}
 .ttl{font-weight:800}.tools,.global{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.slot{position:relative;aspect-ratio:16/9;background:#000}
-video{width:100%;height:100%;object-fit:contain;background:#000}canvas.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:auto;z-index:2}
-body.single .panels{grid-template-columns:1fr}body.single #panelB{opacity:0;transform:scale(.98);pointer-events:none;position:absolute;left:-9999px}
+video{width:100%;height:100%;object-fit:contain;background:#000}
+canvas.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:auto;z-index:2}
+#triggerFlash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,75,75,0.8);color:#fff;
+font-weight:900;padding:20px 40px;border-radius:12px;font-size:22px;z-index:999;display:none;}
+body.single .panels{grid-template-columns:1fr}
+body.single #panelB{opacity:0;transform:scale(.98);pointer-events:none;position:absolute;left:-9999px}
 body.single #recordBothSection{display:none}
 </style>
 </head>
 <body>
+<div id="triggerFlash">AUTO RECORD TRIGGERED</div>
 <div class="wrap">
 <header class="hero"><div class="brand"><span class="dot"></span>Hover Greens Studio</div></header>
-
-<section class="panel">
-<header><span class="ttl">Global Controls</span>
+<section class="panel"><header><span class="ttl">Global Controls</span>
 <div class="global">
 <label class="pill">Playback <input id="rate" type="range" min="0.1" max="1" step="0.05" value="0.35"></label>
-<button class="btn" id="btnSync">Play/Pause Both</button>
-<button class="btn" id="btnBack">◀︎ Frame</button><button class="btn" id="btnFwd">Frame ▶︎</button>
+<button class="btn" id="btnSync">Play/Pause Both</button><button class="btn" id="btnBack">◀︎ Frame</button><button class="btn" id="btnFwd">Frame ▶︎</button>
 <label class="pill"><input type="checkbox" id="autoLoop" checked> Loop</label>
 <label class="pill green">Mode:<select id="modeSelect" class="green"><option value="dual">Dual</option><option value="single">Single</option></select></label>
 <label class="pill"><input type="checkbox" id="autoRecordToggle"> Auto Record</label>
@@ -42,15 +44,11 @@ body.single #recordBothSection{display:none}
 <div style="display:flex;align-items:center;gap:6px;">
   <div id="soundMeterWrap" style="width:100px;height:8px;background:#222;border-radius:4px;overflow:hidden;">
     <div id="soundMeter" style="width:0;height:100%;background:#1E7030;transition:width .05s linear;"></div>
-  </div>
-  <span class="tiny" id="soundLabel">0.00</span>
-</div>
-</div></header>
-</section>
+  </div><span class="tiny" id="soundLabel">0.00</span>
+</div></div></header></section>
 
 <section class="panels">
-<div class="panel" data-role="player" id="panelA">
-<header><span class="ttl">Angle A</span>
+<div class="panel" data-role="player" id="panelA"><header><span class="ttl">Angle A</span>
 <div class="tools"><span class="tiny">Camera:</span><select class="camSel"></select><button class="btn txt camRefresh">↻</button>
 <button class="btn" data-cam>Start Camera</button><span class="pill tiny">Playback <span class="rate">1.00x</span></span></div></header>
 <div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
@@ -60,8 +58,7 @@ body.single #recordBothSection{display:none}
 <label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
 <button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span></div></div></footer></div>
 
-<div class="panel" data-role="player" id="panelB">
-<header><span class="ttl">Angle B</span>
+<div class="panel" data-role="player" id="panelB"><header><span class="ttl">Angle B</span>
 <div class="tools"><span class="tiny">Camera:</span><select class="camSel"></select><button class="btn txt camRefresh">↻</button>
 <button class="btn" data-cam>Start Camera</button><span class="pill tiny">Playback <span class="rate">1.00x</span></span></div></header>
 <div class="slot"><video class="vid" playsinline></video><canvas class="overlay"></canvas></div>
@@ -71,19 +68,13 @@ body.single #recordBothSection{display:none}
 <label class="pill">Draw:<select class="drawMode"><option value="off">Off</option><option value="line">Line</option><option value="circle">Circle</option></select></label>
 <button class="btn" data-rec>● Rec</button><button class="btn danger" data-stop disabled>■</button><span class="tiny recStatus">Idle</span></div></div></footer></div>
 </section>
-
-<div class="divider"></div>
-<section class="panel" id="recordBothSection"><header><span class="ttl">Record Both</span>
-<div class="tools"><label class="pill">Max Dur <input type="number" id="maxDur" min="1" max="120" value="8" style="width:70px;text-align:center"></label>
-<label class="pill"><input type="checkbox" id="autoPlayAfter" checked> Auto Play</label>
-<button class="btn" id="recordBoth">● Record Both</button><button class="btn danger" id="stopBoth" disabled>■</button><span class="tiny" id="recStatus">Idle</span></div></header></section>
 </div>
 
 <script>
 (function(){
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
-const modeSelect=$('#modeSelect'),autoToggle=$('#autoRecordToggle'),autoLight=$('#autoRecordLight');let autoActive=false;
-autoToggle.onchange=()=>{autoActive=autoToggle.checked;autoLight.style.background=autoActive?'#1E7030':'#555';};
+const modeSelect=$('#modeSelect'),autoToggle=$('#autoRecordToggle'),autoLight=$('#autoRecordLight');
+let autoActive=false;autoToggle.onchange=()=>{autoActive=autoToggle.checked;autoLight.style.background=autoActive?'#1E7030':'#555';};
 function applyMode(m){document.body.classList.toggle('single',m==='single');}modeSelect.onchange=()=>applyMode(modeSelect.value);applyMode(modeSelect.value);
 
 function makeDrawing(c){const x=c.getContext('2d');const s={shapes:[],a:null,m:'off'};function R(){c.width=c.clientWidth;c.height=c.clientHeight;x.clearRect(0,0,c.width,c.height);x.lineWidth=3;x.strokeStyle='#ff4b4b';for(const t of s.shapes){x.beginPath();if(t.t==='l'){x.moveTo(t.a.x,t.a.y);x.lineTo(t.b.x,t.b.y);}else{x.arc(t.c.x,t.c.y,t.r,0,2*Math.PI);}x.stroke();}}const P=e=>{const r=c.getBoundingClientRect(),X=((e.clientX??e.touches[0]?.clientX)-r.left)/r.width*c.width,Y=((e.clientY??e.touches[0]?.clientY)-r.top)/r.height*c.height;return{x:X,y:Y}};function Dn(e){if(s.m==='off')return;const a=P(e);s.a=s.m==='l'?{t:'l',a:a,b:a}:{t:'c',c:a,r:0};R();}function Mv(e){if(!s.a)return;const b=P(e);if(s.a.t==='l')s.a.b=b;else s.a.r=Math.hypot(b.x-s.a.c.x,b.y-s.a.c.y);R();}function Up(){if(s.a){s.shapes.push(s.a);s.a=null;R();}}c.onpointerdown=Dn;c.onpointermove=Mv;c.onpointerup=Up;window.addEventListener('resize',R);return{setMode:m=>s.m=m[0],clear:()=>{s.shapes=[];R();}};}
@@ -93,12 +84,12 @@ populateCams();
 $$('.panel[data-role=player]').forEach(p=>initPanel(p));
 function initPanel(p){const v=$('.vid',p),o=$('.overlay',p),m=$('.drawMode',p),bC=$('[data-cam]',p),bR=$('[data-rec]',p),rS=$('.recStatus',p),sel=$('.camSel',p),rfr=$('.camRefresh',p);const D=makeDrawing(o);m.onchange=()=>D.setMode(m.value);let strm=null;async function startCam(id){try{const s=await navigator.mediaDevices.getUserMedia({video:id?{deviceId:{exact:id}}:true,audio:false});if(strm)strm.getTracks().forEach(t=>t.stop());v.srcObject=s;v.muted=true;await v.play();strm=s;p.__player={video:v,stream:s,draw:D,motionDetected:false};}catch(e){alert('Camera error');}}bC.onclick=()=>startCam(sel.value||undefined);rfr.onclick=populateCams;let rec=null,ch=[];bR.onclick=()=>{if(!p.__player?.stream){alert('Start camera');return;}ch=[];rec=new MediaRecorder(p.__player.stream);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};rec.onstop=()=>{const B=new Blob(ch);v.srcObject=null;v.src=URL.createObjectURL(B);v.loop=true;v.play();};rec.start();rS.textContent='Recording…';setTimeout(()=>{try{rec.stop()}catch{}rS.textContent='Idle';},3000);};p.__player={video:v,stream:strm,draw:D,motionDetected:false};}
 
-function initMotionDetection(){const W=64,H=36,TH=15,INT=100;$$('.panel[data-role=player]').forEach(p=>{const v=$('.vid',p);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');let prev=null,lastM=0;function loop(){if(v.readyState>=2){x.drawImage(v,0,0,W,H);const f=x.getImageData(0,0,W,H).data;let diff=0;if(prev){for(let i=0;i<f.length;i+=4){const a=(f[i]+f[i+1]+f[i+2])/3,b=(prev[i]+prev[i+1]+prev[i+2])/3;diff+=Math.abs(a-b);}diff/=W*H;if(diff>TH){lastM=performance.now();p.__player.motionDetected=true}else{p.__player.motionDetected=(performance.now()-lastM<500)}}prev=f;}setTimeout(loop,INT);}loop();});}
+function initMotionDetection(){const W=64,H=36,TH=15,INT=100;$$('.panel[data-role=player]').forEach(p=>{const v=$('.vid',p);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});let prev=null,lastM=0;function loop(){if(v.readyState>=2){x.drawImage(v,0,0,W,H);const f=x.getImageData(0,0,W,H).data;let diff=0;if(prev){for(let i=0;i<f.length;i+=4){const a=(f[i]+f[i+1]+f[i+2])/3,b=(prev[i]+prev[i+1]+prev[i+2])/3;diff+=Math.abs(a-b);}diff/=W*H;if(diff>TH){lastM=performance.now();p.__player.motionDetected=true}else{p.__player.motionDetected=(performance.now()-lastM<500)}}prev=f;}setTimeout(loop,INT);}loop();});}
 initMotionDetection();
 
-async function initSoundTrigger(){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const mic=await navigator.mediaDevices.getUserMedia({audio:true});const src=ctx.createMediaStreamSource(mic);const an=ctx.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.fftSize);const TH=0.12,COOL=2000;let last=0;const bar=$('#soundMeter'),label=$('#soundLabel');
+async function initSoundTrigger(){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();document.body.addEventListener('click',()=>ctx.resume(),{once:true});const mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,channelCount:1}});const src=ctx.createMediaStreamSource(mic);const an=ctx.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.fftSize);const TH=0.08,COOL=2000;let last=0;const bar=$('#soundMeter'),label=$('#soundLabel'),flash=$('#triggerFlash');
 function rms(){an.getByteTimeDomainData(d);let s=0;for(let i=0;i<d.length;i++){const v=(d[i]-128)/128;s+=v*v;}return Math.sqrt(s/d.length);}
-function trigger(){const now=performance.now();if(now-last<COOL)return;last=now;const recent=[...$$('.panel[data-role=player]')].some(p=>p.__player&&p.__player.motionDetected);if(!recent)return;$$('[data-rec]').forEach(btn=>{const pl=btn.closest('.panel').__player;if(pl&&pl.stream)btn.click();});bar.style.background='#ff4b4b';setTimeout(()=>bar.style.background='#1E7030',200);}
+function trigger(){const now=performance.now();if(now-last<COOL)return;last=now;const recent=[...$$('.panel[data-role=player]')].some(p=>p.__player&&p.__player.motionDetected);if(!recent)return;$$('[data-rec]').forEach(btn=>{const pl=btn.closest('.panel').__player;if(pl&&pl.stream)btn.click();});bar.style.background='#ff4b4b';flash.style.display='block';setTimeout(()=>{bar.style.background='#1E7030';flash.style.display='none';},300);}
 (function listen(){const level=rms();label.textContent=level.toFixed(2);bar.style.width=Math.min(level*100,100)+'%';if(autoActive&&level>TH)trigger();requestAnimationFrame(listen);})();}catch(e){console.warn('mic init',e);}}
 initSoundTrigger();
 })();
