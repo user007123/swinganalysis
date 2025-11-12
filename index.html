@@ -6,42 +6,32 @@
 <title>Hover Greens Studio</title>
 <style>
   :root{
-    --bg:#000000; --panel:#0A0A0A; --fg:#FFFFFF; --muted:#CCCCCC;
+    --bg:#000; --panel:#0A0A0A; --fg:#fff; --muted:#ccc;
     --border:#1a1a1a; --accent:#1E7030; --stroke:#ff4b4b;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:var(--accent);text-decoration:none}
+  html,body{margin:0;background:var(--bg);color:var(--fg);
+            font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
   .wrap{max-width:1200px;margin:0 auto;padding:24px}
-
-  /* Header */
   header.hero{display:flex;align-items:center;justify-content:space-between;padding:6px 0 16px}
   .brand{font-weight:900;font-size:20px;display:flex;align-items:center;gap:10px}
   .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
-
-  /* Buttons & Controls */
   .btn{border:1px solid var(--border);background:#000;color:var(--fg);
        padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;transition:.15s}
   .btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn.flat-green{background:var(--accent);border-color:var(--accent)}
-  .btn.flat-green:hover{background:#155324;border-color:#155324}
   .btn.danger{background:#ff4b4b;border-color:#ff4b4b;color:#000}
   .btn.danger:hover{background:#c83c3c;border-color:#c83c3c;color:#fff}
-  .btn.txt{background:transparent;border:1px solid var(--border)} /* minimalist text-like */
+  .btn.txt{background:transparent;border:1px solid var(--border)}
   .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#000;color:var(--muted)}
   .pill.green{color:var(--accent)}
   .tiny{font-size:12px;color:var(--muted)}
   .divider{height:1px;background:var(--border);margin:18px 0}
-
-  /* Inputs */
   select,input[type="number"]{background:#000;color:#fff;border:1px solid var(--border);border-radius:8px;padding:6px}
   select.green{color:var(--accent)}
   input[type="range"]{appearance:none;height:4px;background:#1a1a1a;border-radius:999px;outline:none;width:160px}
   input[type="range"]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:none;cursor:pointer}
-  .camSel{width:240px}      /* fixed width for alignment */
-  .camRefresh{width:56px}   /* fixed width for ↻ button */
-
-  /* Panels */
+  .camSel{width:240px}
+  .camRefresh{width:56px}
   .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;transition:grid-template-columns .35s ease}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .35s ease,opacity .35s ease}
   .panel header,.panel footer{padding:10px 12px;border-bottom:1px solid var(--border)}
@@ -51,8 +41,6 @@
   .slot{position:relative;aspect-ratio:16/9;background:#000}
   video{width:100%;height:100%;object-fit:contain;background:#000}
   canvas.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:auto;z-index:2}
-
-  /* Single mode */
   body.single .panels{grid-template-columns:1fr}
   body.single #panelB{opacity:0;transform:scale(.98);pointer-events:none;position:absolute;left:-9999px}
   body.single #recordBothSection{display:none}
@@ -69,7 +57,7 @@
       <header>
         <span class="ttl">Global Controls</span>
         <div class="global">
-          <label class="pill">Playback&nbsp;<input id="rate" type="range" min="0.1" max="1.0" step="0.05" value="0.35"></label>
+          <label class="pill">Playback&nbsp;<input id="rate" type="range" min="0.1" max="1" step="0.05" value="0.35"></label>
           <button class="btn" id="btnSync">Play/Pause Both</button>
           <button class="btn" id="btnBack">◀︎ Frame</button>
           <button class="btn" id="btnFwd">Frame ▶︎</button>
@@ -86,13 +74,13 @@
 
     <!-- Panels -->
     <section class="panels" id="panelGrid">
-      <!-- A -->
+      <!-- Panel Template -->
       <div class="panel" data-role="player" id="panelA">
         <header>
           <span class="ttl">Angle A</span>
           <div class="tools">
             <span class="tiny">Camera:</span>
-            <select class="camSel" id="camSelA"></select>
+            <select class="camSel"></select>
             <button class="btn txt camRefresh">↻</button>
             <button class="btn" data-cam>Start Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
@@ -104,15 +92,15 @@
         </div>
         <footer>
           <div class="tools">
-            <div class="group">
+            <div>
               <button class="btn" data-play>Play</button>
               <button class="btn" data-pause>Pause</button>
               <button class="btn" data-back>◀︎ Frame</button>
               <button class="btn" data-fwd>Frame ▶︎</button>
               <button class="btn" data-clear>Clear Drawings</button>
             </div>
-            <div class="group">
-              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+            <div>
+              <label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
               <label class="pill">Draw:
                 <select class="drawMode">
                   <option value="off">Off</option>
@@ -128,13 +116,12 @@
         </footer>
       </div>
 
-      <!-- B -->
       <div class="panel" data-role="player" id="panelB">
         <header>
           <span class="ttl">Angle B</span>
           <div class="tools">
             <span class="tiny">Camera:</span>
-            <select class="camSel" id="camSelB"></select>
+            <select class="camSel"></select>
             <button class="btn txt camRefresh">↻</button>
             <button class="btn" data-cam>Start Camera</button>
             <span class="pill tiny">Playback <span class="rate">1.00x</span></span>
@@ -146,15 +133,15 @@
         </div>
         <footer>
           <div class="tools">
-            <div class="group">
+            <div>
               <button class="btn" data-play>Play</button>
               <button class="btn" data-pause>Pause</button>
               <button class="btn" data-back>◀︎ Frame</button>
               <button class="btn" data-fwd>Frame ▶︎</button>
               <button class="btn" data-clear>Clear Drawings</button>
             </div>
-            <div class="group">
-              <label class="pill">Rate <input type="range" min="0.1" max="1.0" step="0.05" value="0.35" data-rate></label>
+            <div>
+              <label class="pill">Rate <input type="range" min="0.1" max="1" step="0.05" value="0.35" data-rate></label>
               <label class="pill">Draw:
                 <select class="drawMode">
                   <option value="off">Off</option>
@@ -172,15 +159,13 @@
     </section>
 
     <div class="divider"></div>
-
-    <!-- Record Both -->
     <section class="panel" id="recordBothSection">
       <header>
         <span class="ttl">Record Both (Sync)</span>
         <div class="tools">
           <label class="pill">Max Duration (s) <input type="number" id="maxDur" min="1" max="120" value="8" style="width:70px;text-align:center"></label>
           <label class="pill"><input type="checkbox" id="autoPlayAfter" checked> Auto-play after record</label>
-          <button class="btn flat-green" id="recordBoth">● Record Both</button>
+          <button class="btn" id="recordBoth">● Record Both</button>
           <button class="btn danger" id="stopBoth" disabled>■ Stop</button>
           <span class="tiny" id="recStatus">Not recording</span>
         </div>
@@ -194,328 +179,61 @@
   const $$=(s,el=document)=>[...el.querySelectorAll(s)];
   const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
 
-  // LocalStorage keys
-  const LS_MODE = 'hg_mode';
-  const LS_CAM_A = 'hg_camA';
-  const LS_CAM_B = 'hg_camB';
+  const rateGlobal=$('#rate');const btnSync=$('#btnSync');const btnBack=$('#btnBack');const btnFwd=$('#btnFwd');
+  const autoLoop=$('#autoLoop');const modeSelect=$('#modeSelect');
+  function applyMode(m){document.body.classList.toggle('single',m==='single');}
+  modeSelect.addEventListener('change',()=>applyMode(modeSelect.value));applyMode(modeSelect.value);
 
-  // Global refs
-  const rateGlobal = $('#rate');
-  const btnSync = $('#btnSync'), btnBack=$('#btnBack'), btnFwd=$('#btnFwd');
-  const autoLoop = $('#autoLoop');
-  const modeSelect = $('#modeSelect');
+  // === Drawing system (simplified) ===
+  function makeDrawing(c){const x=c.getContext('2d');const s={shapes:[],a:null,m:'off'};function r(){const w=c.width=c.clientWidth,h=c.height=c.clientHeight;x.clearRect(0,0,w,h);x.lineWidth=3;x.strokeStyle='#ff4b4b';for(const t of s.shapes){x.beginPath();if(t.t==='l'){x.moveTo(t.a.x,t.a.y);x.lineTo(t.b.x,t.b.y);}else{x.arc(t.c.x,t.c.y,t.r,0,2*Math.PI);}x.stroke();}}r();const p=e=>{const rct=c.getBoundingClientRect(),xv=((e.clientX??e.touches[0].clientX)-rct.left)/rct.width*c.width,yv=((e.clientY??e.touches[0].clientY)-rct.top)/rct.height*c.height;return{x:xv,y:yv};};function d(e){if(s.m==='off')return;const a=p(e);s.a=s.m==='l'?{t:'l',a:a,b:a}:{t:'c',c:a,r:0};r();}function mv(e){if(!s.a)return;const b=p(e);if(s.a.t==='l')s.a.b=b;else s.a.r=Math.hypot(b.x-s.a.c.x,b.y-s.a.c.y);r();}function u(){if(s.a){s.shapes.push(s.a);s.a=null;r();}}c.addEventListener('pointerdown',d);c.addEventListener('pointermove',mv);c.addEventListener('pointerup',u);return{setMode:m=>s.m=m[0],clear:()=>{s.shapes=[];r();}};}
 
-  // Restore last mode
-  const savedMode = localStorage.getItem(LS_MODE) || 'dual';
-  modeSelect.value = savedMode;
-  applyMode(savedMode);
-  modeSelect.addEventListener('change', ()=>{
-    localStorage.setItem(LS_MODE, modeSelect.value);
-    applyMode(modeSelect.value);
-  });
-  function applyMode(mode){ document.body.classList.toggle('single', mode==='single'); }
+  // === Panels ===
+  $$('.panel[data-role="player"]').forEach(p=>initPanel(p));
+  function initPanel(p){
+    const v=$('.vid',p),o=$('.overlay',p),m=$('.drawMode',p),bC=$('[data-cam]',p),bR=$('[data-rec]',p),bS=$('[data-stop]',p),
+          rS=$('.recStatus',p),sel=$('.camSel',p),rfr=$('.camRefresh',p);const D=makeDrawing(o);m.onchange=()=>D.setMode(m.value);
+    let strm=null;async function startCam(id){try{const s=await navigator.mediaDevices.getUserMedia({video:id?{deviceId:{exact:id}}:true,audio:false});if(strm)strm.getTracks().forEach(t=>t.stop());v.srcObject=s;v.play();strm=s;p.__player={video:v,stream:s,draw:D,motion:false};}catch(e){alert('Camera error');}}bC.onclick=()=>startCam(sel.value||undefined);rfr.onclick=populateCams;
+    let rec=null,ch=[];bR.onclick=()=>{ch=[];rec=new MediaRecorder(strm);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data);};rec.onstop=()=>{const B=new Blob(ch);v.srcObject=null;v.src=URL.createObjectURL(B);v.play();};rec.start();rS.textContent='Recording…';setTimeout(()=>{rec.stop();rS.textContent='Idle';},3000);};bS.onclick=()=>{rec&&rec.stop();rS.textContent='Idle';};p.__player={video:v,stream:strm,draw:D,motion:false};}
 
-  // Frame step helper
-  function step(video, dir=+1){ const dt=1/60; video.pause(); video.currentTime= Math.min((video.duration||1e9), Math.max(0, video.currentTime + dir*dt)); }
+  async function populateCams(){const cams=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');$$('.camSel').forEach((s,i)=>{s.innerHTML='';cams.forEach((c,ci)=>{const o=document.createElement('option');o.value=c.deviceId;o.textContent=c.label||`Camera ${ci+1}`;s.appendChild(o);});});}
+  populateCams();
 
-  // Camera device management
-  let cachedCameras = [];
-  async function enumerateCameras(){
-    try{
-      // Try to ensure labels are available
-      await navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});
-      const devs = await navigator.mediaDevices.enumerateDevices();
-      cachedCameras = devs.filter(d=>d.kind==='videoinput');
-    }catch(e){ console.warn(e); cachedCameras=[]; }
-    return cachedCameras;
-  }
-
-  async function populateCameraDropdowns(){
-    const cams = await enumerateCameras();
-    const map = {panelA: localStorage.getItem(LS_CAM_A), panelB: localStorage.getItem(LS_CAM_B)};
-    [['#panelA', LS_CAM_A], ['#panelB', LS_CAM_B]].forEach(([pid, key], idx)=>{
-      const panel = $(pid);
-      const sel = panel.querySelector('.camSel');
-      const prev = sel.value;
-      sel.innerHTML='';
-      cams.forEach((c,i)=>{
-        const o=document.createElement('option');
-        o.value = c.deviceId || '';
-        o.textContent = c.label || `Camera ${i+1}`;
-        sel.appendChild(o);
+  // === SOUND trigger ===
+  async function initSoundTrigger(){
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const mic=await navigator.mediaDevices.getUserMedia({audio:true});
+    const src=ctx.createMediaStreamSource(mic);const an=ctx.createAnalyser();an.fftSize=512;src.connect(an);
+    const d=new Uint8Array(an.fftSize);let last=0;const TH=0.27,COOL=2000,CLIP=3000;
+    function rms(){an.getByteTimeDomainData(d);let s=0;for(let i=0;i<d.length;i++){const v=(d[i]-128)/128;s+=v*v;}return Math.sqrt(s/d.length);}
+    function trigger(){const n=performance.now();if(n-last<COOL)return;last=n;
+      const recentMotion=[...$$('.panel[data-role="player"]')].some(p=>p.__player&&p.__player.motionDetected);
+      if(!recentMotion)return;
+      $$('.panel[data-role="player"]').forEach(p=>{
+        const pl=p.__player;if(!pl||!pl.stream)return;
+        const ch=[];const rec=new MediaRecorder(pl.stream);rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data);};
+        rec.onstop=()=>{const b=new Blob(ch);pl.video.srcObject=null;pl.video.src=URL.createObjectURL(b);pl.video.loop=true;pl.video.play();};
+        rec.start();setTimeout(()=>rec.stop(),CLIP);
       });
-      const stored = localStorage.getItem(key);
-      if(cams.length){
-        // Prefer stored -> previous -> index default
-        const target = stored && [...sel.options].some(o=>o.value===stored) ? stored
-                    : prev && [...sel.options].some(o=>o.value===prev) ? prev
-                    : (idx < cams.length ? cams[idx].deviceId : cams[0].deviceId);
-        sel.value = target || '';
-      }
+    }
+    function listen(){if(rms()>TH)trigger();requestAnimationFrame(listen);}listen();
+  }
+  initSoundTrigger();
+
+  // === Motion detection ===
+  function initMotionDetection(){
+    const W=64,H=36,TH=15,INTERVAL=100;
+    $$('.panel[data-role="player"]').forEach(p=>{
+      const v=$('.vid',p);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');let prev=null,lastMotion=0;
+      function loop(){
+        if(v.readyState>=2){x.drawImage(v,0,0,W,H);const f=x.getImageData(0,0,W,H).data;let diff=0;
+          if(prev){for(let i=0;i<f.length;i+=4){const a=(f[i]+f[i+1]+f[i+2])/3,b=(prev[i]+prev[i+1]+prev[i+2])/3;diff+=Math.abs(a-b);}diff/=W*H;
+            if(diff>TH){lastMotion=performance.now();p.__player.motionDetected=true;}else p.__player.motionDetected=(performance.now()-lastMotion<500);}
+          prev=f;}
+      setTimeout(loop,INTERVAL);}
+      loop();
     });
   }
-
-  // Drawing layer (red, no fill)
-  function makeDrawing(overlay){
-    const ctx = overlay.getContext('2d');
-    const state = {shapes:[], active:null, mode:'off'};
-    function resize(){
-      const r = overlay.getBoundingClientRect();
-      overlay.width = Math.max(2, Math.floor(r.width));
-      overlay.height = Math.max(2, Math.floor(r.height));
-      draw();
-    }
-    const ro = new ResizeObserver(resize); ro.observe(overlay);
-
-    function draw(){
-      ctx.clearRect(0,0,overlay.width,overlay.height);
-      ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
-      ctx.strokeStyle = '#ff4b4b';
-      for(const s of state.shapes){
-        if(s.type==='line'){ ctx.beginPath(); ctx.moveTo(s.a.x,s.a.y); ctx.lineTo(s.b.x,s.b.y); ctx.stroke(); }
-        if(s.type==='circle'){ ctx.beginPath(); ctx.arc(s.c.x, s.c.y, s.r, 0, Math.PI*2); ctx.stroke(); }
-      }
-      if(state.active){
-        ctx.setLineDash([8,6]);
-        if(state.active.type==='line'){ ctx.beginPath(); ctx.moveTo(state.active.a.x,state.active.a.y); ctx.lineTo(state.active.b.x,state.active.b.y); ctx.stroke(); }
-        if(state.active.type==='circle'){ ctx.beginPath(); ctx.arc(state.active.c.x, state.active.c.y, state.active.r, 0, Math.PI*2); ctx.stroke(); }
-        ctx.setLineDash([]);
-      }
-    }
-    function pos(ev){
-      const r = overlay.getBoundingClientRect();
-      const cx = (ev.clientX ?? ev.touches?.[0]?.clientX);
-      const cy = (ev.clientY ?? ev.touches?.[0]?.clientY);
-      return { x:(cx - r.left)/r.width*overlay.width, y:(cy - r.top)/r.height*overlay.height };
-    }
-    function down(ev){
-      if(state.mode==='off') return;
-      ev.preventDefault();
-      const p = pos(ev);
-      state.active = state.mode==='line' ? {type:'line', a:p, b:p} : {type:'circle', c:p, r:0};
-      draw();
-    }
-    function move(ev){
-      if(!state.active) return;
-      const p = pos(ev);
-      if(state.active.type==='line'){ state.active.b = p; }
-      else{ const dx=p.x-state.active.c.x, dy=p.y-state.active.c.y; state.active.r=Math.hypot(dx,dy); }
-      draw();
-    }
-    function up(){
-      if(!state.active) return;
-      if(state.active.type==='line'){ const {a,b}=state.active; if(Math.hypot(a.x-b.x,a.y-b.y)>2) state.shapes.push(state.active); }
-      else if(state.active.type==='circle'){ if(state.active.r>1) state.shapes.push(state.active); }
-      state.active=null; draw();
-    }
-    overlay.addEventListener('pointerdown', down);
-    overlay.addEventListener('pointermove', move);
-    overlay.addEventListener('pointerup', up);
-    overlay.addEventListener('pointerleave', up);
-    overlay.addEventListener('touchstart', down, {passive:false});
-    overlay.addEventListener('touchmove', move, {passive:false});
-    overlay.addEventListener('touchend', up);
-
-    resize();
-    return { setMode:(m)=>state.mode=m, clear:()=>{state.shapes.length=0; state.active=null; draw();}, redraw:draw };
-  }
-
-  // Panel init
-  function initPanel(panel, which){
-    const video = panel.querySelector('.vid');
-    const overlay = panel.querySelector('.overlay');
-    const drawSel = panel.querySelector('.drawMode');
-    const btnCam = panel.querySelector('[data-cam]');
-    const btnPlay = panel.querySelector('[data-play]');
-    const btnPause = panel.querySelector('[data-pause]');
-    const btnBack = panel.querySelector('[data-back]');
-    const btnFwd = panel.querySelector('[data-fwd]');
-    const rateLbl = panel.querySelector('.rate');
-    const rateSlider = panel.querySelector('[data-rate]');
-    const btnClear = panel.querySelector('[data-clear]');
-    const btnRec = panel.querySelector('[data-rec]');
-    const btnStop = panel.querySelector('[data-stop]');
-    const recStatus = panel.querySelector('.recStatus');
-    const camSel = panel.querySelector('.camSel');
-    const camRefresh = panel.querySelector('.camRefresh');
-
-    const LS_KEY = which==='A' ? LS_CAM_A : LS_CAM_B;
-
-    // Drawing
-    const drawAPI = makeDrawing(overlay);
-    drawSel.addEventListener('change', ()=>drawAPI.setMode(drawSel.value));
-
-    // Camera start/switch
-    let currentStream = null;
-    async function startCamWith(deviceId){
-      try{
-        const constraints = { video: deviceId ? {deviceId:{exact:deviceId}, width:{ideal:1920}, height:{ideal:1080}} : {width:{ideal:1920}, height:{ideal:1080}}, audio:false };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        if(currentStream) currentStream.getTracks().forEach(t=>t.stop());
-        currentStream = stream;
-        video.srcObject = stream; video.muted = true; await video.play();
-        panel.__player.stream = stream;
-        if(deviceId) localStorage.setItem(LS_KEY, deviceId);
-      }catch(e){ console.error(e); alert('Camera permission denied or camera unavailable.'); }
-    }
-    btnCam.addEventListener('click', ()=>startCamWith(camSel.value || undefined));
-    camSel.addEventListener('change', ()=>{
-      localStorage.setItem(LS_KEY, camSel.value || '');
-      if(panel.__player?.stream) startCamWith(camSel.value || undefined);
-    });
-    camRefresh.addEventListener('click', populateCameraDropdowns);
-
-    // Controls
-    btnPlay.addEventListener('click', ()=>video.play());
-    btnPause.addEventListener('click', ()=>video.pause());
-    btnBack.addEventListener('click', ()=>step(video,-1));
-    btnFwd.addEventListener('click', ()=>step(video, 1));
-
-    // Rate
-    function applyGlobal(){ const r=parseFloat(rateGlobal.value); video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; }
-    applyGlobal();
-    rateSlider.addEventListener('input', ()=>{ video.playbackRate=parseFloat(rateSlider.value); rateLbl.textContent=video.playbackRate.toFixed(2)+'x'; });
-
-    // Per-panel recording
-    let rec=null, chunks=[];
-    function makeRecorder(stream, ondata){
-      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
-               : MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
-      const r = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:6_000_000});
-      r.ondataavailable = e=>{ if(e.data && e.data.size) ondata(e.data); };
-      return r;
-    }
-    btnRec.addEventListener('click', async ()=>{
-      try{
-        if(!panel.__player.stream) await startCamWith(camSel.value || undefined);
-        chunks=[]; rec = makeRecorder(panel.__player.stream, d=>chunks.push(d));
-        rec.onstart=()=>{ btnRec.disabled=true; btnStop.disabled=false; recStatus.textContent='Recording…'; };
-        rec.onstop=()=>{
-          btnRec.disabled=false; btnStop.disabled=true; recStatus.textContent='Idle';
-          const blob = new Blob(chunks, {type: chunks[0]?.type || 'video/webm'});
-          const url = URL.createObjectURL(blob);
-          video.srcObject=null; video.src=url; video.loop=autoLoop.checked; video.load(); video.currentTime=0; video.play();
-        };
-        rec.start();
-      }catch(e){ console.error(e); alert('Unable to start recording.'); }
-    });
-    btnStop.addEventListener('click', ()=>{ try{ rec && rec.state!=='inactive' && rec.stop(); }catch{} });
-
-    // Expose API
-    panel.__player = {
-      video, overlay, drawAPI, stream:null,
-      setRate:(r)=>{ video.playbackRate=r; rateSlider.value=r; rateLbl.textContent=r.toFixed(2)+'x'; },
-      step:(d)=>{ const dt=1/60; video.pause(); video.currentTime=Math.min((video.duration||1e9), Math.max(0, video.currentTime + d*dt)); },
-      startCamWith, camSel
-    };
-
-    // Auto-start last camera on load (if stored)
-    const storedCam = localStorage.getItem(LS_KEY);
-    if(storedCam){ // kick off immediately; browser may prompt if needed
-      // Wait a tick so dropdowns are populated first by outer init
-      setTimeout(()=>startCamWith(storedCam), 50);
-    }
-  }
-
-  // Init both panels
-  const panelA = $('#panelA'), panelB = $('#panelB');
-
-  // Populate camera selects and init panels
-  (async function boot(){
-    await populateCameraDropdowns();
-    initPanel(panelA, 'A');
-    initPanel(panelB, 'B');
-
-    // If there was no stored camera but we still want to resume last state:
-    // (Nothing else to do; user can click Start Camera or choose a device.)
-
-    // Global controls
-    rateGlobal.addEventListener('input', ()=>{
-      const r=parseFloat(rateGlobal.value);
-      [panelA, panelB].forEach(p=>p.__player?.setRate(r));
-    });
-    $('#btnSync').addEventListener('click', ()=>{
-      const vids = $$('.panel[data-role="player"] .vid');
-      const playAll = vids.some(v=>v.paused);
-      vids.forEach(v=>{ v.loop = autoLoop.checked; playAll ? v.play() : v.pause(); });
-    });
-    $('#btnBack').addEventListener('click', ()=>{ [panelA, panelB].forEach(p=>p.__player?.step(-1)); });
-    $('#btnFwd').addEventListener('click', ()=>{ [panelA, panelB].forEach(p=>p.__player?.step(+1)); });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e)=>{
-      if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)) return;
-      if(e.code==='Space'){ e.preventDefault(); $('#btnSync').click(); }
-      if(e.key===','){ e.preventDefault(); $('#btnBack').click(); }
-      if(e.key==='.'){ e.preventDefault(); $('#btnFwd').click(); }
-    });
-  })();
-
-  // Record Both (sync)
-  const recordBothBtn = $('#recordBoth'), stopBothBtn = $('#stopBoth'), recStatusBoth = $('#recStatus');
-  const autoPlayAfter = $('#autoPlayAfter'), maxDur = $('#maxDur');
-  let recA=null, recB=null, chunksA=[], chunksB=[], recTimer=null;
-
-  async function ensureBothStreams(){
-    if(!panelA.__player.stream){ panelA.querySelector('[data-cam]').click(); }
-    if(!panelB.__player.stream){ panelB.querySelector('[data-cam]').click(); }
-  }
-  function makeRecorder(stream, ondata){
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
-              : MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
-    const r = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:6_000_000});
-    r.ondataavailable = e=>{ if(e.data && e.data.size) ondata(e.data); };
-    return r;
-  }
-  function setBothUI(active){ recordBothBtn.disabled=active; stopBothBtn.disabled=!active; recStatusBoth.textContent = active?'Recording…':'Not recording'; }
-
-  async function startBoth(){
-    await ensureBothStreams();
-    const pA = panelA.__player, pB = panelB.__player;
-    chunksA=[]; chunksB=[];
-    recA = makeRecorder(pA.stream, d=>chunksA.push(d));
-    recB = makeRecorder(pB.stream, d=>chunksB.push(d));
-    recA.start(); recB.start();
-    setBothUI(true);
-    const dur = clamp(parseFloat(maxDur.value)||8, 1, 120);
-    recTimer = setTimeout(stopBoth, dur*1000);
-  }
-  function blobToVideo(video, blob){
-    const url = URL.createObjectURL(blob);
-    video.srcObject=null; video.src=url; video.loop=autoLoop.checked; video.load();
-  }
-  function syncAndPlay(){
-    const vA = panelA.__player.video, vB = panelB.__player.video;
-    const start = ()=>{
-      if(Number.isFinite(vA.duration) && vA.duration>0 && Number.isFinite(vB.duration) && vB.duration>0){
-        vA.currentTime=0; vB.currentTime=0;
-        const r=parseFloat(rateGlobal.value);
-        vA.playbackRate=r; vB.playbackRate=r;
-        if(autoPlayAfter.checked){ vA.play(); vB.play(); }
-      }else{ setTimeout(start, 60); }
-    };
-    start();
-  }
-  function stopBoth(){
-    try{ recA && recA.state!=='inactive' && recA.stop(); }catch{}
-    try{ recB && recB.state!=='inactive' && recB.stop(); }catch{}
-    clearTimeout(recTimer); recTimer=null; setBothUI(false);
-
-    const done={};
-    const finish=()=>{
-      if(done.a && done.b){
-        const vA = panelA.__player.video, vB = panelB.__player.video;
-        const blobA = new Blob(chunksA, {type: chunksA[0]?.type || 'video/webm'});
-        const blobB = new Blob(chunksB, {type: chunksB[0]?.type || 'video/webm'});
-        blobToVideo(vA, blobA); blobToVideo(vB, blobB); syncAndPlay();
-      }
-    };
-    if(recA) recA.onstop=()=>{ done.a=true; finish(); };
-    if(recB) recB.onstop=()=>{ done.b=true; finish(); };
-  }
-  recordBothBtn?.addEventListener('click', startBoth);
-  stopBothBtn?.addEventListener('click', stopBoth);
-
+  initMotionDetection();
 })();
 </script>
 </body>
